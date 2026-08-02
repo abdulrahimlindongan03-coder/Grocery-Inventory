@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Smart Inventory with Barcode Scanner</title>
+    <title>RML GROCERY STOCK INVENTORY</title>
     <!-- html2canvas library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- html5-qrcode library for camera barcode scanning -->
@@ -35,7 +35,6 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Animated Gradient Background */
         body {
             background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
             background-size: 400% 400%;
@@ -183,14 +182,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Denser Grid System */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 25px;
         }
 
-        /* Modern Product Card */
         .card {
             background: var(--glass-card);
             border-radius: var(--radius-md);
@@ -297,10 +294,8 @@
         .btn-qty:hover { background: var(--primary); color: white; }
         .qty-display { font-size: 1.1rem; font-weight: 700; min-width: 30px; text-align: center; color: #2f3542;}
 
-        /* Action Bar */
         .action-bar { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }
 
-        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
@@ -348,7 +343,6 @@
             display: none; margin: 15px auto 0; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* Camera Scanner Box */
         #scanner-container {
             width: 100%;
             border-radius: 16px;
@@ -359,7 +353,6 @@
 
         .modal-actions { margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px; }
 
-        /* Mobile Styles */
         @media (max-width: 768px) {
             header { flex-direction: column; text-align: center; gap: 20px; padding: 20px; }
             .header-actions { width: 100%; flex-direction: column; }
@@ -385,15 +378,35 @@
             font-weight: 500; opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); top: 30px; }
+
+        /* Login Screen */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.3); backdrop-filter: blur(15px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+        .login-box {
+            padding: 40px; text-align: center; width: 90%; max-width: 400px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="glass login-box">
+            <h2>✨ Smart Inventory</h2>
+            <p style="margin: 15px 0; color: var(--text-muted);">Register your nickname to continue</p>
+            <input type="text" id="nickname-input" placeholder="Enter your nickname" style="padding: 12px 16px; border-radius: 12px; border: 2px solid #dfe4ea; width: 100%; margin-bottom: 20px; font-size: 1rem; outline: none;">
+            <button class="btn btn-primary" style="width: 100%;" onclick="registerNickname()">Start Managing</button>
+        </div>
+    </div>
 
     <div class="container">
         <header class="glass">
             <div>
                 <h1>✨ Smart Inventory</h1>
-                <p>Track stocks, dates, and restocks beautifully.</p>
+                <p id="welcome-msg">Track stocks, dates, and restocks beautifully.</p>
             </div>
             <div class="header-actions">
                 <button class="btn btn-warning" onclick="startScanner('consume')">📷 Consume (Scan)</button>
@@ -431,11 +444,9 @@
                     <input type="text" id="new-name" placeholder="e.g. Organic Almond Milk">
                 </div>
                 
-                <!-- UPDATED CATEGORY FIELD -->
                 <div class="form-group">
                     <label>Category</label>
                     <select id="new-category" onchange="handleCategoryChange()"></select>
-                    <!-- Hidden input that shows up when "Add New Category" is selected -->
                     <input type="text" id="new-category-name" placeholder="Type new category name..." style="display:none; margin-top:10px; border-color: var(--primary);">
                 </div>
 
@@ -483,38 +494,50 @@
     <div id="receipt-canvas"></div>
 
     <script>
+        // Login System Initialization
+        function checkLogin() {
+            const nickname = localStorage.getItem('premiumInventoryNickname');
+            if (nickname) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('welcome-msg').innerText = `Welcome, ${nickname}! Track stocks, dates, and restocks beautifully.`;
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+            }
+        }
+
+        function registerNickname() {
+            const nickname = document.getElementById('nickname-input').value.trim();
+            if (nickname) {
+                localStorage.setItem('premiumInventoryNickname', nickname);
+                checkLogin();
+                showToast(`Welcome, ${nickname}! 🎉`);
+            } else {
+                alert("Please enter a nickname.");
+            }
+        }
+
         // Helper to generate SVG data-uri for fallbacks
         function generateDefaultImage(text) {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" style="background:%23f1f2f6"><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="40" font-weight="bold" fill="%23a4b0be">${text.charAt(0).toUpperCase()}</text></svg>`;
             return "data:image/svg+xml;base64," + btoa(svg);
         }
 
-        // Initial Data Structure
-        const defaultData = [
-            {
-                category: "Noodles & Pasta",
-                items: [
-                    { id: "n1", barcode: "8992775211018", name: "Spicy Ramen Packs", qty: 12, exp: "2027-01-15", img: generateDefaultImage("Spicy") },
-                    { id: "n2", barcode: "8000300000014", name: "Spaghetti 500g", qty: 4, exp: "2026-11-20", img: generateDefaultImage("Spaghetti") }
-                ]
-            },
-            {
-                category: "Soap & Hygiene",
-                items: [
-                    { id: "s1", barcode: "8999999001001", name: "Lavender Body Soap", qty: 6, exp: "2028-05-10", img: generateDefaultImage("Lavender") }
-                ]
-            }
-        ];
+        // Initialize with Empty Array to meet criteria
+        const defaultData = [];
 
         let inventoryData = JSON.parse(localStorage.getItem('premiumInventoryData')) || defaultData;
         let base64ImageString = ""; 
         let html5QrcodeScanner = null;
-        let currentScannerMode = ""; // "consume" or "addModal"
+        let currentScannerMode = ""; 
 
         // Render Application
         function renderApp() {
             const container = document.getElementById('app-content');
             container.innerHTML = '';
+
+            if (inventoryData.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">No categories or products yet. Click "+ Add New Product" to get started!</div>';
+            }
 
             inventoryData.forEach((categoryGroup, index) => {
                 const section = document.createElement('div');
@@ -525,6 +548,7 @@
                         <div class="category-title">
                             <span>📁 ${categoryGroup.category}</span>
                             <span class="badge">${categoryGroup.items.length}</span>
+                            <button class="btn-delete" style="margin-left: 15px;" onclick="event.stopPropagation(); deleteCategory(${index})">Delete Category 🗑️</button>
                         </div>
                         <div class="category-icon" id="icon-${index}">▼</div>
                     </div>
@@ -532,6 +556,10 @@
 
                 let gridHTML = `<div class="category-content" id="content-${index}"><div class="grid">`;
                 
+                if (categoryGroup.items.length === 0) {
+                    gridHTML += '<p style="color:var(--text-muted); font-style:italic;">No items in this category.</p>';
+                }
+
                 categoryGroup.items.forEach(item => {
                     gridHTML += `
                         <div class="card">
@@ -561,6 +589,16 @@
             });
 
             populateCategorySelect();
+        }
+
+        // Delete Category Function
+        function deleteCategory(index) {
+            if (confirm(`Are you sure you want to completely delete the "${inventoryData[index].category}" category and all its products?`)) {
+                inventoryData.splice(index, 1);
+                saveData(false);
+                renderApp();
+                showToast("Category deleted 🗑️");
+            }
         }
 
         // Accordion Toggle
@@ -655,7 +693,6 @@
             }
         }
 
-        // Handle Consuming scanned items
         function handleConsumeBarcode(barcode) {
             let foundItem = null;
 
@@ -674,7 +711,7 @@
 
             const inputConsume = prompt(`Found Product: "${foundItem.name}"\nCurrent Stock: ${foundItem.qty}\n\nHow many would you like to CONSUME?`, "1");
             
-            if (inputConsume === null) return; // User cancelled
+            if (inputConsume === null) return; 
             
             const consumeAmount = parseInt(inputConsume);
             if (isNaN(consumeAmount) || consumeAmount <= 0) {
@@ -693,7 +730,6 @@
             showToast(`Consumed ${consumeAmount} x ${foundItem.name}! 📉`);
         }
 
-        // File Upload Compression
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -723,27 +759,26 @@
             reader.readAsDataURL(file);
         }
 
-        // Modal Operations
         function openModal() { document.getElementById('productModal').classList.add('active'); }
         function closeModal() { document.getElementById('productModal').classList.remove('active'); clearForm(); }
         
-        // Populates Category and adds "Add New Category" logic
         function populateCategorySelect() {
             const select = document.getElementById('new-category');
             select.innerHTML = '';
             
-            // Loop through existing categories
             inventoryData.forEach(group => { 
                 select.innerHTML += `<option value="${group.category}">${group.category}</option>`; 
             });
             
-            // Append Add New Category option
             select.innerHTML += `<option value="add_new_category" style="font-weight:bold; color:var(--primary);">➕ Add New Category...</option>`;
             
-            handleCategoryChange(); // Reset layout on load
+            // Auto-select add new category if there are no existing categories
+            if(inventoryData.length === 0) {
+                select.value = 'add_new_category';
+            }
+            handleCategoryChange(); 
         }
         
-        // Shows text input if user selects "Add New Category"
         function handleCategoryChange() {
             const select = document.getElementById('new-category');
             const newCatInput = document.getElementById('new-category-name');
@@ -766,13 +801,12 @@
             document.getElementById('img-preview').style.display = 'none';
             base64ImageString = "";
             
-            // Reset Category UI
             const select = document.getElementById('new-category');
             if (select.options.length > 0) select.selectedIndex = 0;
+            if (inventoryData.length === 0) select.value = 'add_new_category';
             handleCategoryChange();
         }
 
-        // Add Product Logic (Now supports Custom Categories)
         function addNewProduct() {
             const barcode = document.getElementById('new-barcode').value.trim();
             const name = document.getElementById('new-name').value.trim();
@@ -783,7 +817,6 @@
 
             if (!name) return alert("Product name is required!");
 
-            // Check if user is creating a new category
             if (category === 'add_new_category') {
                 if (!newCatName) return alert("Please enter a name for your new category!");
                 category = newCatName; 
@@ -799,7 +832,6 @@
                 img: finalImage 
             };
 
-            // Check if category exists (case insensitive), if yes, push to it, if not, create new
             let categoryGroup = inventoryData.find(g => g.category.toLowerCase() === category.toLowerCase());
             
             if (categoryGroup) { 
@@ -814,7 +846,6 @@
             saveData(false);
             renderApp();
             
-            // Auto open the category section that the product was just added to
             const catIndex = inventoryData.findIndex(g => g.category.toLowerCase() === category.toLowerCase());
             if(catIndex !== -1) {
                 document.getElementById(`content-${catIndex}`).style.display = "block";
@@ -825,7 +856,6 @@
             showToast("Product Added Successfully! 🎉");
         }
 
-        // Save & Toast
         function saveData(notify = true) {
             localStorage.setItem('premiumInventoryData', JSON.stringify(inventoryData));
             if(notify) showToast("Inventory Saved! 💾");
@@ -838,7 +868,6 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        // Visual Receipt Generator
         function generateReceipt() {
             const receiptDiv = document.getElementById('receipt-canvas');
             const now = new Date();
@@ -851,7 +880,7 @@
             `;
 
             inventoryData.forEach(group => {
-                if (group.items.length === 0) return; // skip empty categories
+                if (group.items.length === 0) return; 
                 receiptHTML += `<div style="margin-top:25px; font-weight:700; border-bottom:2px solid #dfe6e9; font-size:20px; padding-bottom:8px; color:#000;">${group.category}</div>`;
                 
                 group.items.forEach(item => {
@@ -887,7 +916,8 @@
             }, 500);
         }
 
-        // Initialize App
+        // Check login on script load, then render app
+        checkLogin();
         renderApp();
     </script>
 </body>
