@@ -63,7 +63,7 @@
 
         header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; padding: 25px 30px; flex-wrap: wrap; gap: 15px;
+            margin-bottom: 25px; padding: 25px 30px; flex-wrap: wrap; gap: 15px;
         }
 
         header h1 {
@@ -83,6 +83,17 @@
         header p { color: var(--text-muted); font-size: 1rem; font-weight: 500; }
         .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
+        #expiry-alert-banner {
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: var(--radius-md);
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: none;
+        }
+        #expiry-alert-banner h3 { color: #ff4757; margin-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .alert-item-list { display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; color: #2f3542; }
+
         .btn {
             display: inline-flex; align-items: center; justify-content: center;
             padding: 12px 20px; font-size: 0.95rem; font-weight: 600;
@@ -99,6 +110,8 @@
         .btn-info:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4); }
         .btn-danger { background: linear-gradient(135deg, #ff9a44 0%, #fc6076 100%); color: white; box-shadow: 0 4px 15px rgba(252, 96, 118, 0.3); }
         .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(252, 96, 118, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: #2f3542; box-shadow: 0 4px 15px rgba(56, 249, 215, 0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 249, 215, 0.4); }
 
         .btn-delete {
             background: rgba(255, 71, 87, 0.1); color: #ff4757;
@@ -143,7 +156,7 @@
 
         .batch-list {
             display: flex; flex-direction: column; gap: 8px; margin-top: auto;
-            max-height: 150px; overflow-y: auto; padding-right: 5px;
+            max-height: 160px; overflow-y: auto; padding-right: 5px;
         }
         .batch-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -151,7 +164,12 @@
             border-left: 4px solid var(--primary);
         }
         .batch-item.no-exp { border-left-color: #00f2fe; background: #f0fbff; }
+        .batch-item.exp-warning { border-left-color: var(--warning); background: #fffdf0; }
+        .batch-item.exp-danger { border-left-color: var(--danger); background: #fff0f1; }
+
+        .batch-info-box { display: flex; flex-direction: column; }
         .batch-exp { font-size: 0.85rem; font-weight: 600; color: #57606f; }
+        .batch-countdown { font-size: 0.72rem; font-weight: 600; }
         
         .controls { display: flex; align-items: center; gap: 10px; }
         .btn-qty {
@@ -162,7 +180,7 @@
         .btn-qty:hover { background: var(--primary); color: white; border-color: var(--primary); }
         .qty-display { font-size: 1rem; font-weight: 700; min-width: 20px; text-align: center; color: #2f3542;}
 
-        .action-bar { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }
+        .action-bar { display: flex; gap: 15px; justify-content: center; margin-top: 40px; flex-wrap: wrap; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -230,7 +248,7 @@
     <div id="login-overlay">
         <div class="glass login-box">
             <h2>✨ Smart Inventory</h2>
-            <p style="margin: 15px 0; color: var(--text-muted);">Register your Gmail to receive auto-confirmations and expiry alerts.</p>
+            <p style="margin: 15px 0; color: var(--text-muted);">Register your Gmail to receive auto-confirmations and automatic daily expiry alerts.</p>
             
             <div class="form-group" style="text-align: left;">
                 <label>Nickname</label>
@@ -248,10 +266,10 @@
     <div class="container">
         <header class="glass">
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h1>✨ Smart Inventory</h1>
+                <h1>✨ RML Smart Inventory</h1>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="user-badge" id="user-badge">👤 <span id="display-nickname">User</span></div>
-                    <p id="welcome-msg" style="margin:0;">Auto-Saving Enabled.</p>
+                    <p id="welcome-msg" style="margin:0;">School Supplies & Auto-Email Expiry Tracking Active.</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -260,9 +278,16 @@
             </div>
         </header>
 
+        <!-- EXPIRING SOON ALERT BANNER AT TOP -->
+        <div id="expiry-alert-banner">
+            <h3>⚠️ Expiry Warning Notice</h3>
+            <div class="alert-item-list" id="expiry-alert-list"></div>
+        </div>
+
         <main id="app-content"></main>
 
         <div class="action-bar">
+            <button class="btn btn-success" onclick="sendExpiryEmail()">📧 Force Send Expiry Report</button>
             <button class="btn btn-danger" onclick="generateReceipt()">🧾 Download Visual Receipt</button>
         </div>
     </div>
@@ -276,17 +301,17 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Barcode Lookup (Auto-fetch info)</label>
+                    <label>Barcode / School Supply Keyword Lookup</label>
                     <div class="input-with-btn">
-                        <input type="text" id="new-barcode" placeholder="Scan or type barcode" oninput="checkBarcodeOnline()">
+                        <input type="text" id="new-barcode" placeholder="Scan barcode or type item (e.g. pencil, pen)" oninput="checkBarcodeOnline()">
                         <button class="btn btn-warning" style="padding:0 15px;" onclick="startScanner('addModal')">📷 Scan</button>
                     </div>
-                    <small style="color:var(--text-muted); font-size:0.8rem;">Scanning automatically fetches names, images, & categories!</small>
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Auto-detects school supplies, groceries, names, images, & categories!</small>
                 </div>
                 
                 <div class="form-group">
                     <label>Product Name</label>
-                    <input type="text" id="new-name" class="capitalize" placeholder="e.g. Organic Almond Milk">
+                    <input type="text" id="new-name" class="capitalize" placeholder="e.g. Spiral Notebook">
                 </div>
                 <div class="form-group">
                     <label>Category</label>
@@ -296,7 +321,7 @@
                 <div class="form-group">
                     <label>Product Image</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('new-file').click()">
-                        📸 Tap to Upload Image (or Auto-fetch via Barcode)
+                        📸 Tap to Upload Image (or Auto-fetched via Lookup)
                     </div>
                     <input type="file" id="new-file" accept="image/*" style="display:none;" onchange="previewImage(event)">
                     <img id="img-preview" src="" alt="Preview">
@@ -305,9 +330,9 @@
                 <div class="form-group">
                     <label>Expiration Date</label>
                     <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
-                        <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')"> No Expiration Date
+                        <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')" checked> No Expiration Date (Recommended for School Supplies)
                     </label>
-                    <div class="date-columns" id="new-date-columns">
+                    <div class="date-columns" id="new-date-columns" style="opacity:0.3; pointer-events:none;">
                         <select id="new-exp-month">
                             <option value="" disabled selected>Month</option>
                             <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
@@ -359,9 +384,9 @@
                 <div class="form-group">
                     <label>New Expiration Date</label>
                     <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
-                        <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')"> No Expiration Date
+                        <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')" checked> No Expiration Date
                     </label>
-                    <div class="date-columns" id="exist-date-columns">
+                    <div class="date-columns" id="exist-date-columns" style="opacity:0.3; pointer-events:none;">
                         <select id="exist-exp-month">
                             <option value="" disabled selected>Month</option>
                             <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
@@ -416,7 +441,7 @@
         const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
         const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
 
-        if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+        if (EMAILJS_PUBLIC_KEY !== "eRoaGvs5CAfhTpWf2") {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
@@ -425,13 +450,11 @@
         let html5QrcodeScanner = null;
         let currentScannerMode = ""; 
 
-        // HELPER: Convert text to Title Case (Capital Letter)
         function toTitleCase(str) {
             if (!str) return "";
             return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         }
 
-        // TOGGLE NO EXPIRY VIEW
         function toggleNoExp(mode) {
             const isChecked = document.getElementById(`${mode}-no-exp`).checked;
             const dateColumns = document.getElementById(`${mode}-date-columns`);
@@ -444,7 +467,30 @@
             }
         }
 
-        // --- GMAIL & NICKNAME FLOW ---
+        function getExpiryStatus(expString) {
+            if (expString === 'No Expiry') return { status: 'safe', label: '♾️ No Expiry', daysLeft: 9999 };
+            
+            const expDate = new Date(expString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const diffTime = expDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return { status: 'expired', label: `🔴 Expired (${Math.abs(diffDays)}d ago)`, daysLeft: diffDays };
+            } else if (diffDays === 0) {
+                return { status: 'danger', label: `⚠️ Expires Today!`, daysLeft: 0 };
+            } else if (diffDays <= 7) {
+                return { status: 'warning', label: `⏳ Expires in ${diffDays} day${diffDays > 1 ? 's' : ''}`, daysLeft: diffDays };
+            } else if (diffDays <= 30) {
+                let weeks = Math.ceil(diffDays / 7);
+                return { status: 'safe', label: `🗓️ Expires in ~${weeks} week${weeks > 1 ? 's' : ''}`, daysLeft: diffDays };
+            } else {
+                return { status: 'safe', label: `🗓️ Exp: ${expString}`, daysLeft: diffDays };
+            }
+        }
+
         function checkLogin() {
             const email = localStorage.getItem('inventoryEmail');
             const nickname = localStorage.getItem('inventoryNickname');
@@ -454,6 +500,8 @@
                     document.getElementById('display-nickname').innerText = nickname;
                     document.getElementById('user-badge').style.display = 'inline-flex';
                 }
+                // Trigger automatic daily email check upon login
+                checkAndSendAutomaticEmail();
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
             }
@@ -471,7 +519,7 @@
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
 
-                if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
+                if (EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") {
                     setTimeout(() => {
                         checkLogin();
                         showToast(`Welcome, ${nickname}! 🎉`);
@@ -479,7 +527,7 @@
                     return;
                 }
 
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name: nickname, to_email: email })
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name: nickname, to_email: email, message: "Welcome to Smart Inventory! Automatic daily expiry alerts are now active." })
                     .then(function(response) {
                         checkLogin();
                         showToast(`Welcome, ${nickname}! 🎉`);
@@ -493,7 +541,79 @@
             }
         }
 
-        // --- CORE DATA / RENDER ENGINE ---
+        function checkAndSendAutomaticEmail() {
+            const email = localStorage.getItem('inventoryEmail');
+            const nickname = localStorage.getItem('inventoryNickname');
+            if (!email || EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") return;
+
+            const todayStr = new Date().toDateString();
+            const lastSent = localStorage.getItem('lastAutoExpiryEmailDate');
+
+            if (lastSent === todayStr) return; // Already sent automatically today
+
+            let expiringItemsHTML = "";
+            inventoryData.forEach(group => {
+                group.items.forEach(item => {
+                    item.batches.forEach(batch => {
+                        let expInfo = getExpiryStatus(batch.exp);
+                        if (expInfo.daysLeft <= 7) {
+                            expiringItemsHTML += `- ${item.name} (${batch.qty} pcs) - Expiry: ${batch.exp} [${expInfo.label}]\n`;
+                        }
+                    });
+                });
+            });
+
+            if (expiringItemsHTML) {
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_name: nickname,
+                    to_email: email,
+                    message: "🤖 Automatic Daily Expiry Report:\n\n" + expiringItemsHTML
+                }).then(() => {
+                    localStorage.setItem('lastAutoExpiryEmailDate', todayStr);
+                    showToast("Automatic Expiry Report Sent to Gmail! 📧");
+                }).catch(err => {
+                    console.log("Automatic email dispatch failed", err);
+                });
+            }
+        }
+
+        function sendExpiryEmail() {
+            const email = localStorage.getItem('inventoryEmail');
+            const nickname = localStorage.getItem('inventoryNickname');
+            if (!email) return alert("Please log in with a Gmail address first.");
+
+            let expiringItemsHTML = "";
+            inventoryData.forEach(group => {
+                group.items.forEach(item => {
+                    item.batches.forEach(batch => {
+                        let expInfo = getExpiryStatus(batch.exp);
+                        if (expInfo.daysLeft <= 7) {
+                            expiringItemsHTML += `- ${item.name} (${batch.qty} pcs) - Expiry: ${batch.exp} [${expInfo.label}]\n`;
+                        }
+                    });
+                });
+            });
+
+            if (!expiringItemsHTML) {
+                return alert("Great news! No products are nearing expiration or expired right now.");
+            }
+
+            if (EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") {
+                return alert("EmailJS Public Key is not configured. Update the code with your keys to enable Gmail alerts.");
+            }
+
+            showToast("Sending Expiry Report to Gmail... ⏳");
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_name: nickname,
+                to_email: email,
+                message: "Here is your current Expiry Alert Report:\n\n" + expiringItemsHTML
+            }).then(() => {
+                showToast("Expiry Report Sent to Gmail! 📧");
+            }, () => {
+                alert("Failed to send email alert.");
+            });
+        }
+
         function autoSaveData(silent = false) {
             localStorage.setItem('premiumInventoryDataV3', JSON.stringify(inventoryData));
             if(!silent) showToast("Changes Auto-Saved! 💾");
@@ -504,8 +624,14 @@
             const container = document.getElementById('app-content');
             container.innerHTML = '';
 
+            let alertBanner = document.getElementById('expiry-alert-banner');
+            let alertList = document.getElementById('expiry-alert-list');
+            alertList.innerHTML = '';
+            let urgentCount = 0;
+
             if (inventoryData.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">No products yet. Click "+ Add New Product" to get started!</div>';
+                alertBanner.style.display = 'none';
                 return;
             }
 
@@ -524,21 +650,48 @@
                 `;
 
                 let gridHTML = `<div class="category-content" id="content-${index}" style="display:block;"><div class="grid">`;
-                categoryGroup.items.forEach(item => { gridHTML += renderProductCard(item); });
+                
+                categoryGroup.items.forEach(item => { 
+                    gridHTML += renderProductCard(item); 
+                    
+                    item.batches.forEach(b => {
+                        let status = getExpiryStatus(b.exp);
+                        if (status.daysLeft <= 7) {
+                            urgentCount++;
+                            alertList.innerHTML += `<div>• <b>${item.name}</b> (${b.qty} pcs) — <span style="color:#d63031; font-weight:600;">${status.label}</span></div>`;
+                        }
+                    });
+                });
+
                 gridHTML += `</div></div>`;
                 section.innerHTML = headerHTML + gridHTML;
                 container.appendChild(section);
             });
+
+            if (urgentCount > 0) {
+                alertBanner.style.display = 'block';
+            } else {
+                alertBanner.style.display = 'none';
+            }
+
             populateCategorySelect();
         }
 
         function renderProductCard(item) {
             let batchesHTML = '';
             item.batches.forEach((batch) => {
-                const isNoExp = batch.exp === 'No Expiry';
+                const expStatus = getExpiryStatus(batch.exp);
+                let badgeClass = '';
+                if (batch.exp === 'No Expiry') badgeClass = 'no-exp';
+                else if (expStatus.status === 'expired' || expStatus.status === 'danger') badgeClass = 'exp-danger';
+                else if (expStatus.status === 'warning') badgeClass = 'exp-warning';
+
                 batchesHTML += `
-                    <div class="batch-item ${isNoExp ? 'no-exp' : ''}">
-                        <span class="batch-exp">${isNoExp ? '♾️ No Expiry' : '🗓️ ' + batch.exp}</span>
+                    <div class="batch-item ${badgeClass}">
+                        <div class="batch-info-box">
+                            <span class="batch-exp">${batch.exp === 'No Expiry' ? '♾️ No Expiry' : '🗓️ ' + batch.exp}</span>
+                            <span class="batch-countdown" style="color:${expStatus.status === 'expired' || expStatus.status === 'danger' ? '#ff4757' : (expStatus.status === 'warning' ? '#e1b12c' : '#57606f')}">${expStatus.label}</span>
+                        </div>
                         <div class="controls">
                             <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', -1)">-</button>
                             <span class="qty-display">${batch.qty}</span>
@@ -572,49 +725,86 @@
             }
         }
 
-        // --- BARCODE ONLINE LOOKUP API (With Auto-Category & Capitalization) ---
         async function checkBarcodeOnline() {
-            const barcode = document.getElementById('new-barcode').value.trim();
-            if (barcode.length < 8) return;
+            const inputVal = document.getElementById('new-barcode').value.trim();
+            if (inputVal.length < 3) return;
 
-            try {
-                let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                let data = await response.json();
-                
-                if(data.status === 1) {
-                    let product = data.product;
-                    
-                    if(product.product_name) {
+            if (inputVal.length >= 8 && !isNaN(inputVal)) {
+                try {
+                    let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${inputVal}.json`);
+                    let data = await response.json();
+                    if(data.status === 1 && data.product && data.product.product_name) {
+                        let product = data.product;
                         document.getElementById('new-name').value = toTitleCase(product.product_name);
-                    }
-                    
-                    if(product.categories) {
-                        let autoCat = toTitleCase(product.categories.split(',')[0].trim());
-                        let catSelect = document.getElementById('new-category');
-                        
-                        let optionExists = Array.from(catSelect.options).some(opt => opt.value === autoCat);
-                        if (!optionExists) {
-                            let newOption = new Option(autoCat, autoCat);
-                            catSelect.add(newOption, catSelect.options.length - 1);
+                        if(product.categories) {
+                            let autoCat = toTitleCase(product.categories.split(',')[0].trim());
+                            setCategoryDropdown(autoCat);
                         }
-                        catSelect.value = autoCat;
-                        handleCategoryChange();
+                        if(product.image_url) {
+                            const preview = document.getElementById('img-preview');
+                            preview.src = product.image_url;
+                            preview.style.display = 'block';
+                            base64ImageString = product.image_url;
+                        }
+                        showToast("Product Found Online! 🌐");
+                        return;
                     }
-
-                    if(product.image_url) {
-                        const preview = document.getElementById('img-preview');
-                        preview.src = product.image_url;
-                        preview.style.display = 'block';
-                        base64ImageString = product.image_url;
-                        showToast("Product Info & Category Found Online! 🌐");
-                    }
+                } catch(e) {
+                    console.log("OFF lookup skipped");
                 }
-            } catch(e) {
-                console.log("Barcode lookup failed or product not found.");
+            }
+
+            const schoolSuppliesDB = {
+                "pencil": { name: "No. 2 Graphite Pencil", cat: "School Supplies", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&auto=format&fit=crop&q=60" },
+                "pen": { name: "Ballpoint Gel Pen (Black/Blue)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1585336261022-62167dde1cf8?w=400&auto=format&fit=crop&q=60" },
+                "notebook": { name: "Spiral Notebook (80 Leaves)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&auto=format&fit=crop&q=60" },
+                "paper": { name: "Bond Paper Ream (Substance 20)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=400&auto=format&fit=crop&q=60" },
+                "eraser": { name: "White Pearl Eraser", cat: "School Supplies", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=60" },
+                "marker": { name: "Permanent Marker (Black)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1569683795645-b62e50fbf103?w=400&auto=format&fit=crop&q=60" },
+                "binder": { name: "Ring Binder Folder", cat: "School Supplies", img: "https://images.unsplash.com/photo-1607434472257-d9f8e5a04f33?w=400&auto=format&fit=crop&q=60" },
+                "folder": { name: "Index Folder with Pocket", cat: "School Supplies", img: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=60" },
+                "scissors": { name: "Stainless Steel Student Scissors", cat: "School Supplies", img: "https://images.unsplash.com/photo-1595246140590-674b4a3c1137?w=400&auto=format&fit=crop&q=60" },
+                "glue": { name: "Washable School Glue Stick", cat: "School Supplies", img: "https://images.unsplash.com/photo-1572375309998-2b89f7866428?w=400&auto=format&fit=crop&q=60" },
+                "ruler": { name: "12-Inch Plastic Ruler", cat: "School Supplies", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=60" },
+                "highlighter": { name: "Neon Yellow Highlighter", cat: "School Supplies", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&auto=format&fit=crop&q=60" },
+                "crayon": { name: "Crayola Wax Crayons (24 Colors)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400&auto=format&fit=crop&q=60" },
+                "calculator": { name: "Scientific Calculator", cat: "School Supplies", img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&auto=format&fit=crop&q=60" }
+            };
+
+            const lowerInput = inputVal.toLowerCase();
+            let matchedItem = null;
+
+            for (let key in schoolSuppliesDB) {
+                if (lowerInput.includes(key)) {
+                    matchedItem = schoolSuppliesDB[key];
+                    break;
+                }
+            }
+
+            if (matchedItem) {
+                document.getElementById('new-name').value = matchedItem.name;
+                setCategoryDropdown(matchedItem.cat);
+                
+                const preview = document.getElementById('img-preview');
+                preview.src = matchedItem.img;
+                preview.style.display = 'block';
+                base64ImageString = matchedItem.img;
+                
+                showToast("School Supply Auto-Fetched! 📚");
             }
         }
 
-        // --- NEW PRODUCT CREATION ---
+        function setCategoryDropdown(catName) {
+            let catSelect = document.getElementById('new-category');
+            let optionExists = Array.from(catSelect.options).some(opt => opt.value.toLowerCase() === catName.toLowerCase());
+            if (!optionExists) {
+                let newOption = new Option(catName, catName);
+                catSelect.add(newOption, catSelect.options.length - 1);
+            }
+            catSelect.value = catName;
+            handleCategoryChange();
+        }
+
         function saveNewProduct() {
             const barcode = document.getElementById('new-barcode').value.trim();
             const rawName = document.getElementById('new-name').value.trim();
@@ -658,7 +848,6 @@
             autoSaveData();
         }
 
-        // --- SCAN BARCODE TO ADD EXISTING BATCH ---
         function checkExistingBarcode() {
             const barcode = document.getElementById('exist-barcode').value.trim();
             const nameDisplay = document.getElementById('exist-product-name');
@@ -696,7 +885,7 @@
             document.getElementById('exist-barcode').value = "";
             document.getElementById('exist-product-name').innerText = "";
             document.getElementById('exist-item-id').value = "";
-            document.getElementById('exist-no-exp').checked = false;
+            document.getElementById('exist-no-exp').checked = true;
             toggleNoExp('exist');
             document.getElementById('exist-exp-month').value = "";
             document.getElementById('exist-exp-day').value = "";
@@ -733,13 +922,12 @@
                     }
                     closeAddBatchModal();
                     autoSaveData();
-                    showToast("New Batch Expiration Added! ✅");
+                    showToast("New Batch Stock Added! ✅");
                     return;
                 }
             }
         }
 
-        // --- UTILITY/DELETE FUNCTIONS ---
         function updateBatchQty(itemId, batchExp, change) {
             for (let group of inventoryData) {
                 let item = group.items.find(i => i.id === itemId);
@@ -778,13 +966,12 @@
             }
         }
 
-        // --- SCANNERS & MODALS ---
         function openModal() { document.getElementById('productModal').classList.add('active'); }
         function closeModal() { 
             document.getElementById('productModal').classList.remove('active'); 
             document.getElementById('new-barcode').value = '';
             document.getElementById('new-name').value = '';
-            document.getElementById('new-no-exp').checked = false;
+            document.getElementById('new-no-exp').checked = true;
             toggleNoExp('new');
             document.getElementById('new-exp-month').value = '';
             document.getElementById('new-exp-day').value = '';
@@ -864,7 +1051,6 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        // --- RECEIPT DOWNLOAD ---
         function generateReceipt() {
             const receiptDiv = document.getElementById('receipt-canvas');
             const now = new Date();
