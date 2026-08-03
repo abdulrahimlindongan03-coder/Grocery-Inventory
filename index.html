@@ -713,46 +713,48 @@
             populateCategorySelect();
         }
 
-        function renderProductCard(item) {
-            let batchesHTML = '';
-            item.batches.forEach((batch) => {
-                const expStatus = getExpiryStatus(batch.exp);
-                let badgeClass = '';
-                if (batch.exp === 'No Expiry') badgeClass = 'no-exp';
-                else if (expStatus.status === 'expired' || expStatus.status === 'danger') badgeClass = 'exp-danger';
-                else if (expStatus.status === 'warning') badgeClass = 'exp-warning';
+       function renderProductCard(item) {
+    let batchesHTML = '';
+    item.batches.forEach((batch) => {
+        const expStatus = getExpiryStatus(batch.exp);
+        let badgeClass = '';
+        if (batch.exp === 'No Expiry') badgeClass = 'no-exp';
+        else if (expStatus.status === 'expired' || expStatus.status === 'danger') badgeClass = 'exp-danger';
+        else if (expStatus.status === 'warning') badgeClass = 'exp-warning';
 
-                batchesHTML += `
-                    <div class="batch-item ${badgeClass}">
-                        <div class="batch-info-box">
-                            <span class="batch-exp">${batch.exp === 'No Expiry' ? '♾️ No Expiry' : '🗓️ ' + batch.exp}</span>
-                            <span class="batch-countdown" style="color:${expStatus.status === 'expired' || expStatus.status === 'danger' ? '#ff4757' : (expStatus.status === 'warning' ? '#e1b12c' : '#57606f')}">${expStatus.label}</span>
-                        </div>
-                        <div class="controls">
-                            <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', -1)">-</button>
-                            <span class="qty-display">${batch.qty}</span>
-                            <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            });
-            return `
-                <div class="card">
-                    <div class="card-img-wrapper"><img src="${item.img}" alt="${item.name}" loading="lazy"></div>
-                    <div class="card-content">
-                        <div class="card-header-row">
-                            <h3 class="card-title">${item.name}</h3>
-                            <div style="display: flex; gap: 4px;">
-                                <button class="btn-delete" style="background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.2);" onclick="openEditModal('${item.id}')" title="Edit Product">✏️</button>
-                                <button class="btn-delete" onclick="deleteProduct('${item.id}')" title="Delete Product">🗑️</button>
-                            </div>
-                        </div>
-                        ${item.barcode ? `<span class="barcode-badge">🏷️ ${item.barcode}</span>` : ''}
-                        <div class="batch-list">${batchesHTML}</div>
+        // Simplified to only display one line: "Exp: MM/DD/YY" or "No Expiry"
+        const expDisplayText = batch.exp === 'No Expiry' ? 'No Expiry' : `Exp: ${batch.exp}`;
+
+        batchesHTML += `
+            <div class="batch-item ${badgeClass}">
+                <div class="batch-info-box">
+                    <span class="batch-exp">${expDisplayText}</span>
+                </div>
+                <div class="controls">
+                    <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', -1)">-</button>
+                    <span class="qty-display">${batch.qty}</span>
+                    <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    });
+    return `
+        <div class="card">
+            <div class="card-img-wrapper"><img src="${item.img}" alt="${item.name}" loading="lazy"></div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <h3 class="card-title">${item.name}</h3>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn-delete" style="background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.2);" onclick="openEditModal('${item.id}')" title="Edit Product">✏️</button>
+                        <button class="btn-delete" onclick="deleteProduct('${item.id}')" title="Delete Product">🗑️</button>
                     </div>
                 </div>
-            `;
-        }
+                ${item.barcode ? `<span class="barcode-badge">🏷️ ${item.barcode}</span>` : ''}
+                <div class="batch-list">${batchesHTML}</div>
+            </div>
+        </div>
+    `;
+}
 
         function toggleCategory(index) {
             const content = document.getElementById(`content-${index}`);
@@ -1208,50 +1210,51 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        function generateReceipt() {
-            const receiptDiv = document.getElementById('receipt-canvas');
-            const now = new Date();
-            const userNickname = localStorage.getItem('inventoryNickname') || 'Admin';
-            
-            let receiptHTML = `
-                <div style="text-align:center; border-bottom:3px dashed #2d3436; padding-bottom:20px; margin-bottom:20px;">
-                    <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
-                    <h2 style="margin:0; font-size:28px; font-weight:800; color:#2d3436;">STOCK REPORT</h2>
-                    <p style="margin:8px 0 0 0; color:#636e72; font-size:16px; font-weight:bold;">Prepared by: ${userNickname}</p>
-                    <p style="margin:4px 0 0 0; color:#636e72; font-size:14px;">${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
+       function generateReceipt() {
+    const receiptDiv = document.getElementById('receipt-canvas');
+    const now = new Date();
+    const userNickname = localStorage.getItem('inventoryNickname') || 'Admin';
+    
+    // Updated header logo to use app-icon.png
+    let receiptHTML = `
+        <div style="text-align:center; border-bottom:3px dashed #2d3436; padding-bottom:20px; margin-bottom:20px;">
+            <img src="app-icon.png" alt="App Logo" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px;" crossorigin="anonymous">
+            <h2 style="margin:0; font-size:28px; font-weight:800; color:#2d3436;">${userNickname}'s Inventory Report</h2>
+            <p style="margin:8px 0 0 0; color:#636e72; font-size:16px; font-weight:bold;">Powered by RML Smart Inventory</p>
+            <p style="margin:4px 0 0 0; color:#636e72; font-size:14px;">${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
+        </div>`;
+
+    inventoryData.forEach(group => {
+        if (group.items.length === 0) return; 
+        receiptHTML += `<div style="margin-top:25px; font-weight:700; border-bottom:2px solid #dfe6e9; font-size:20px; padding-bottom:8px;">${group.category}</div>`;
+        group.items.forEach(item => {
+            let totalQty = item.batches.reduce((sum, batch) => sum + batch.qty, 0);
+            let batchStrings = item.batches.map(b => b.exp === 'No Expiry' ? `${b.qty}pcs (No Expiry)` : `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
+            receiptHTML += `
+                <div style="display:flex; align-items:center; gap:15px; margin-top:12px;">
+                    <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" crossorigin="anonymous">
+                    <div style="font-size:16px; font-weight:600;">
+                        ${item.name} <span style="font-size:14px; color:#636e72;">(Total: ${totalQty})</span>
+                        <div style="font-size:13px; color:#636e72; font-weight:500;">${batchStrings}</div>
+                    </div>
                 </div>`;
+        });
+    });
 
-            inventoryData.forEach(group => {
-                if (group.items.length === 0) return; 
-                receiptHTML += `<div style="margin-top:25px; font-weight:700; border-bottom:2px solid #dfe6e9; font-size:20px; padding-bottom:8px;">${group.category}</div>`;
-                group.items.forEach(item => {
-                    let totalQty = item.batches.reduce((sum, batch) => sum + batch.qty, 0);
-                    let batchStrings = item.batches.map(b => b.exp === 'No Expiry' ? `${b.qty}pcs (No Expiry)` : `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
-                    receiptHTML += `
-                        <div style="display:flex; align-items:center; gap:15px; margin-top:12px;">
-                            <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" crossorigin="anonymous">
-                            <div style="font-size:16px; font-weight:600;">
-                                ${item.name} <span style="font-size:14px; color:#636e72;">(Total: ${totalQty})</span>
-                                <div style="font-size:13px; color:#636e72; font-weight:500;">${batchStrings}</div>
-                            </div>
-                        </div>`;
-                });
-            });
+    receiptDiv.innerHTML = receiptHTML;
+    showToast("Generating Receipt Image... ⏳");
 
-            receiptDiv.innerHTML = receiptHTML;
-            showToast("Generating Receipt Image... ⏳");
-
-            setTimeout(() => {
-                html2canvas(receiptDiv, { backgroundColor: '#ffffff', scale: 2, useCORS: true }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `Stock_Report_${now.getTime()}.png`;
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                    receiptDiv.innerHTML = '';
-                    showToast("Receipt Downloaded! 🧾");
-                });
-            }, 800);
-        }
+    setTimeout(() => {
+        html2canvas(receiptDiv, { backgroundColor: '#ffffff', scale: 2, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Stock_Report_${now.getTime()}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            receiptDiv.innerHTML = '';
+            showToast("Receipt Downloaded! 🧾");
+        });
+    }, 800);
+}
 
         checkLogin();
         renderApp();
