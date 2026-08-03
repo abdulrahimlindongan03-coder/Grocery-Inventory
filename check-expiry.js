@@ -31,7 +31,8 @@ async function runDailyCheck() {
         expiringItems.forEach(item => {
             messageBody += `• ${item.name} (Expires: ${item.expiryDate})\n`;
         });
-        messageBody += "\nPlease log in to your dashboard to manage your stock.";
+        // Replace the URL below with your actual dashboard link (e.g., GitHub Pages link or local server link)
+        messageBody += "\nAccess your dashboard here: https://abdulrahimlindongan03-coder.github.io/Grocery-Inventory/";
 
         const templateParams = {
             to_email: "rmlinventory2026@gmail.com",
