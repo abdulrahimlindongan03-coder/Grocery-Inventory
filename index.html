@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RML Smart Inventory Pro</title>
+    <title>Premium Inventory Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -266,7 +266,7 @@
     <div class="container">
         <header class="glass">
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h1>✨ RML Smart Inventory</h1>
+                <h1>✨ Smart Inventory</h1>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="user-badge" id="user-badge">👤 <span id="display-nickname">User</span></div>
                     <p id="welcome-msg" style="margin:0;">School Supplies & Auto-Email Expiry Tracking Active.</p>
@@ -437,11 +437,11 @@
     <div id="receipt-canvas" style="position:fixed; top:-9999px; width:420px; background:#fff; padding:40px; color:#000;"></div>
 
     <script>
-        const EMAILJS_PUBLIC_KEY = "eRoaGvs5CAfhTpWf2";  
+        const EMAILJS_PUBLIC_KEY = "s9JVqJECJ6GtFy_70";  
         const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
         const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
 
-        if (EMAILJS_PUBLIC_KEY !== "eRoaGvs5CAfhTpWf2") {
+        if (EMAILJS_PUBLIC_KEY !== "s9JVqJECJ6GtFy_70") {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
@@ -519,7 +519,7 @@
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
 
-                if (EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") {
+                if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
                     setTimeout(() => {
                         checkLogin();
                         showToast(`Welcome, ${nickname}! 🎉`);
@@ -544,7 +544,7 @@
         function checkAndSendAutomaticEmail() {
             const email = localStorage.getItem('inventoryEmail');
             const nickname = localStorage.getItem('inventoryNickname');
-            if (!email || EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") return;
+            if (!email || EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") return;
 
             const todayStr = new Date().toDateString();
             const lastSent = localStorage.getItem('lastAutoExpiryEmailDate');
@@ -598,7 +598,7 @@
                 return alert("Great news! No products are nearing expiration or expired right now.");
             }
 
-            if (EMAILJS_PUBLIC_KEY === "eRoaGvs5CAfhTpWf2") {
+            if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
                 return alert("EmailJS Public Key is not configured. Update the code with your keys to enable Gmail alerts.");
             }
 
