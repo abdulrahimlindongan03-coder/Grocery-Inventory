@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Inventory Pro</title>
+    <title>RML Smart Inventory Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -221,7 +221,7 @@
         }
         .file-upload-wrapper:hover { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
         
-        #img-preview { max-width: 100%; height: 140px; object-fit: contain; display: none; margin: 15px auto 0; border-radius: 10px; }
+        #img-preview, #edit-img-preview { max-width: 100%; height: 140px; object-fit: contain; display: none; margin: 15px auto 0; border-radius: 10px; }
         #scanner-container { width: 100%; border-radius: 16px; overflow: hidden; background: #000; margin-bottom: 15px; }
         
         .modal-actions { margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px; }
@@ -266,7 +266,7 @@
     <div class="container">
         <header class="glass">
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h1>✨ Smart Inventory</h1>
+                <h1>✨ RML Smart Inventory</h1>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="user-badge" id="user-badge">👤 <span id="display-nickname">User</span></div>
                     <p id="welcome-msg" style="margin:0;">School Supplies & Auto-Email Expiry Tracking Active.</p>
@@ -363,6 +363,43 @@
         </div>
     </div>
 
+    <!-- EDIT PRODUCT MODAL -->
+    <div class="modal-overlay" id="editProductModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Product Details</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-item-id">
+                <div class="form-group">
+                    <label>Barcode</label>
+                    <input type="text" id="edit-barcode" placeholder="Barcode">
+                </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="edit-name" class="capitalize" placeholder="Product Name">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="edit-category"></select>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <div class="file-upload-wrapper" onclick="document.getElementById('edit-file').click()">
+                        📸 Tap to Change Image
+                    </div>
+                    <input type="file" id="edit-file" accept="image/*" style="display:none;" onchange="previewEditImage(event)">
+                    <img id="edit-img-preview" src="" alt="Preview">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f1f2f6; color:#2f3542;" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditedProduct()">Update Product</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCAN TO ADD TO EXISTING BATCH MODAL -->
     <div class="modal-overlay" id="addBatchModal">
         <div class="modal-content">
@@ -441,12 +478,13 @@
         const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
         const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
 
-        if (EMAILJS_PUBLIC_KEY !== "s9JVqJECJ6GtFy_70") {
+        if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
         let inventoryData = JSON.parse(localStorage.getItem('premiumInventoryDataV3')) || [];
         let base64ImageString = ""; 
+        let editBase64ImageString = "";
         let html5QrcodeScanner = null;
         let currentScannerMode = ""; 
 
@@ -500,7 +538,6 @@
                     document.getElementById('display-nickname').innerText = nickname;
                     document.getElementById('user-badge').style.display = 'inline-flex';
                 }
-                // Trigger automatic daily email check upon login
                 checkAndSendAutomaticEmail();
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
@@ -519,7 +556,7 @@
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
 
-                if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
+                if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
                     setTimeout(() => {
                         checkLogin();
                         showToast(`Welcome, ${nickname}! 🎉`);
@@ -544,12 +581,12 @@
         function checkAndSendAutomaticEmail() {
             const email = localStorage.getItem('inventoryEmail');
             const nickname = localStorage.getItem('inventoryNickname');
-            if (!email || EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") return;
+            if (!email || EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") return;
 
             const todayStr = new Date().toDateString();
             const lastSent = localStorage.getItem('lastAutoExpiryEmailDate');
 
-            if (lastSent === todayStr) return; // Already sent automatically today
+            if (lastSent === todayStr) return;
 
             let expiringItemsHTML = "";
             inventoryData.forEach(group => {
@@ -598,7 +635,7 @@
                 return alert("Great news! No products are nearing expiration or expired right now.");
             }
 
-            if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
+            if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
                 return alert("EmailJS Public Key is not configured. Update the code with your keys to enable Gmail alerts.");
             }
 
@@ -706,7 +743,10 @@
                     <div class="card-content">
                         <div class="card-header-row">
                             <h3 class="card-title">${item.name}</h3>
-                            <button class="btn-delete" onclick="deleteProduct('${item.id}')">🗑️</button>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="btn-delete" style="background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.2);" onclick="openEditModal('${item.id}')" title="Edit Product">✏️</button>
+                                <button class="btn-delete" onclick="deleteProduct('${item.id}')" title="Delete Product">🗑️</button>
+                            </div>
                         </div>
                         ${item.barcode ? `<span class="barcode-badge">🏷️ ${item.barcode}</span>` : ''}
                         <div class="batch-list">${batchesHTML}</div>
@@ -846,6 +886,112 @@
             
             closeModal();
             autoSaveData();
+        }
+
+        // Edit Modal Functions
+        function openEditModal(itemId) {
+            let foundItem = null;
+            let foundCategory = "";
+            for (let group of inventoryData) {
+                let item = group.items.find(i => i.id === itemId);
+                if (item) {
+                    foundItem = item;
+                    foundCategory = group.category;
+                    break;
+                }
+            }
+            if (!foundItem) return;
+
+            document.getElementById('edit-item-id').value = foundItem.id;
+            document.getElementById('edit-barcode').value = foundItem.barcode || "";
+            document.getElementById('edit-name').value = foundItem.name;
+            
+            const catSelect = document.getElementById('edit-category');
+            catSelect.innerHTML = '';
+            inventoryData.forEach(group => {
+                catSelect.innerHTML += `<option value="${group.category}" ${group.category === foundCategory ? 'selected' : ''}>${group.category}</option>`;
+            });
+
+            editBase64ImageString = foundItem.img;
+            const preview = document.getElementById('edit-img-preview');
+            preview.src = foundItem.img;
+            preview.style.display = 'block';
+
+            document.getElementById('editProductModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProductModal').classList.remove('active');
+            editBase64ImageString = "";
+        }
+
+        function previewEditImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400; canvas.height = 400;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 400, 400);
+                    editBase64ImageString = canvas.toDataURL('image/jpeg', 0.8);
+                    const preview = document.getElementById('edit-img-preview');
+                    preview.src = editBase64ImageString;
+                    preview.style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function saveEditedProduct() {
+            const itemId = document.getElementById('edit-item-id').value;
+            const barcode = document.getElementById('edit-barcode').value.trim();
+            const rawName = document.getElementById('edit-name').value.trim();
+            const name = toTitleCase(rawName);
+            const newCategory = document.getElementById('edit-category').value;
+
+            if (!name) return alert("Product name is required!");
+
+            let targetItem = null;
+            let oldGroupIndex = -1;
+            let oldItemIndex = -1;
+
+            for (let gIndex = 0; gIndex < inventoryData.length; gIndex++) {
+                let group = inventoryData[gIndex];
+                let iIndex = group.items.findIndex(i => i.id === itemId);
+                if (iIndex !== -1) {
+                    targetItem = group.items[iIndex];
+                    oldGroupIndex = gIndex;
+                    oldItemIndex = iIndex;
+                    break;
+                }
+            }
+
+            if (!targetItem) return alert("Product not found.");
+
+            targetItem.barcode = barcode;
+            targetItem.name = name;
+            targetItem.img = editBase64ImageString || targetItem.img;
+
+            inventoryData[oldGroupIndex].items.splice(oldItemIndex, 1);
+
+            if (inventoryData[oldGroupIndex].items.length === 0 && inventoryData[oldGroupIndex].category !== newCategory) {
+                inventoryData.splice(oldGroupIndex, 1);
+            }
+
+            let targetGroup = inventoryData.find(g => g.category.toLowerCase() === newCategory.toLowerCase());
+            if (targetGroup) {
+                targetGroup.items.push(targetItem);
+            } else {
+                inventoryData.push({ category: newCategory, items: [targetItem] });
+            }
+
+            closeEditModal();
+            autoSaveData();
+            showToast("Product Updated Successfully! ✏️");
         }
 
         function checkExistingBarcode() {
