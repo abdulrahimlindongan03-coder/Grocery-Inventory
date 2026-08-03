@@ -1,0 +1,27 @@
+name: Daily Expiry Email Alert
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC (8:00 AM PHT)
+  workflow_dispatch: # Allows manual testing anytime
+
+jobs:
+  check-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install firebase-admin @emailjs/nodejs
+
+      - name: Run expiry check script
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EMAILJS_PRIVATE_KEY: ${{ secrets.EMAILJS_PRIVATE_KEY }}
+        run: node check-expiry.js
