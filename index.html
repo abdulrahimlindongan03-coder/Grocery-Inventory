@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Inventory Pro</title>
+    <title>RML Smart Inventory Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -71,6 +73,13 @@
             margin-bottom: 5px;
         }
 
+        .user-badge {
+            background: var(--primary); color: white; padding: 6px 14px;
+            border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+            display: none; align-items: center; gap: 6px; width: fit-content;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+
         header p { color: var(--text-muted); font-size: 1rem; font-weight: 500; }
         .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -86,14 +95,10 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4); }
         .btn-warning { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #2f3542; box-shadow: 0 4px 15px rgba(253, 160, 133, 0.3); }
         .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(253, 160, 133, 0.4); }
-        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3); }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4); }
-        .btn-danger { background: linear-gradient(135deg, #ff9a44 0%, #fc6076 100%); color: white; box-shadow: 0 4px 15px rgba(252, 96, 118, 0.3); }
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(252, 96, 118, 0.4); }
-        
-        /* New Button Style for Existing Product */
         .btn-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3); }
         .btn-info:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4); }
+        .btn-danger { background: linear-gradient(135deg, #ff9a44 0%, #fc6076 100%); color: white; box-shadow: 0 4px 15px rgba(252, 96, 118, 0.3); }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(252, 96, 118, 0.4); }
 
         .btn-delete {
             background: rgba(255, 71, 87, 0.1); color: #ff4757;
@@ -128,7 +133,7 @@
         
         .card-content { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-        .card-title { font-size: 1.05rem; font-weight: 600; color: #2f3542; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-title { font-size: 1.05rem; font-weight: 600; color: #2f3542; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
         
         .barcode-badge {
             font-size: 0.75rem; background: #e0e7ff; color: var(--primary);
@@ -145,9 +150,8 @@
             background: #f1f2f6; padding: 8px 12px; border-radius: 12px;
             border-left: 4px solid var(--primary);
         }
-        .batch-item.expiring { border-left-color: #ff4757; background: #fff0f1; }
+        .batch-item.no-exp { border-left-color: #00f2fe; background: #f0fbff; }
         .batch-exp { font-size: 0.85rem; font-weight: 600; color: #57606f; }
-        .batch-item.expiring .batch-exp { color: #ff4757; }
         
         .controls { display: flex; align-items: center; gap: 10px; }
         .btn-qty {
@@ -160,7 +164,6 @@
 
         .action-bar { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }
 
-        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
@@ -188,11 +191,10 @@
             width: 100%; padding: 12px 16px; border: 2px solid #dfe4ea; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s; background: #ffffff;
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        .form-group input[type="text"].capitalize { text-transform: capitalize; }
         
         .input-with-btn { display: flex; gap: 10px; }
-        
-        /* Expiration Date Columns */
-        .date-columns { display: flex; gap: 10px; }
+        .date-columns { display: flex; gap: 10px; transition: opacity 0.3s ease; }
         .date-columns select { flex: 1; }
 
         .file-upload-wrapper {
@@ -214,7 +216,6 @@
         }
         #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); top: 30px; }
 
-        /* Login Screen */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.3); backdrop-filter: blur(15px);
@@ -225,7 +226,7 @@
 </head>
 <body>
 
-    <!-- Login Overlay with Gmail Confirmation -->
+    <!-- Login Overlay -->
     <div id="login-overlay">
         <div class="glass login-box">
             <h2>✨ Smart Inventory</h2>
@@ -240,19 +241,21 @@
                 <input type="email" id="email-input" placeholder="e.g. name@gmail.com">
             </div>
 
-            <button class="btn btn-primary" style="width: 100%;" onclick="registerAccount()">Sign Up & Enter</button>
+            <button class="btn btn-primary" style="width: 100%;" id="signup-btn" onclick="registerAccount()">Sign Up & Enter</button>
         </div>
     </div>
 
     <div class="container">
         <header class="glass">
-            <div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
                 <h1>✨ Smart Inventory</h1>
-                <p id="welcome-msg">Auto-Saving Enabled. Track stocks beautifully.</p>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="user-badge" id="user-badge">👤 <span id="display-nickname">User</span></div>
+                    <p id="welcome-msg" style="margin:0;">Auto-Saving Enabled.</p>
+                </div>
             </div>
             <div class="header-actions">
-                <button class="btn btn-warning" onclick="startScanner('consume')">📷 Consume (Scan)</button>
-                <button class="btn btn-info" onclick="openAddBatchModal()">+ Add to Existing</button>
+                <button class="btn btn-info" onclick="openAddBatchModal()">+ Scan & Add to Existing</button>
                 <button class="btn btn-primary" onclick="openModal()">+ Add New Product</button>
             </div>
         </header>
@@ -260,7 +263,6 @@
         <main id="app-content"></main>
 
         <div class="action-bar">
-            <!-- Removed the Save Data button as requested -->
             <button class="btn btn-danger" onclick="generateReceipt()">🧾 Download Visual Receipt</button>
         </div>
     </div>
@@ -279,31 +281,33 @@
                         <input type="text" id="new-barcode" placeholder="Scan or type barcode" oninput="checkBarcodeOnline()">
                         <button class="btn btn-warning" style="padding:0 15px;" onclick="startScanner('addModal')">📷 Scan</button>
                     </div>
-                    <small style="color:var(--text-muted); font-size:0.8rem;">Scanned barcodes automatically fetch images via OpenFoodFacts Database.</small>
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Scanning automatically fetches names, images, & categories!</small>
                 </div>
                 
                 <div class="form-group">
                     <label>Product Name</label>
-                    <input type="text" id="new-name" placeholder="e.g. Organic Almond Milk">
+                    <input type="text" id="new-name" class="capitalize" placeholder="e.g. Organic Almond Milk">
                 </div>
                 <div class="form-group">
                     <label>Category</label>
                     <select id="new-category" onchange="handleCategoryChange()"></select>
-                    <input type="text" id="new-category-name" placeholder="Type new category name..." style="display:none; margin-top:10px;">
+                    <input type="text" id="new-category-name" class="capitalize" placeholder="Type new category name..." style="display:none; margin-top:10px;">
                 </div>
                 <div class="form-group">
                     <label>Product Image</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('new-file').click()">
-                        📸 Tap to Upload Image (or Scan Barcode to Auto-fetch)
+                        📸 Tap to Upload Image (or Auto-fetch via Barcode)
                     </div>
                     <input type="file" id="new-file" accept="image/*" style="display:none;" onchange="previewImage(event)">
                     <img id="img-preview" src="" alt="Preview">
                 </div>
 
-                <!-- Expiration Date Columns -->
                 <div class="form-group">
                     <label>Expiration Date</label>
-                    <div class="date-columns">
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
+                        <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')"> No Expiration Date
+                    </label>
+                    <div class="date-columns" id="new-date-columns">
                         <select id="new-exp-month">
                             <option value="" disabled selected>Month</option>
                             <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
@@ -334,7 +338,7 @@
         </div>
     </div>
 
-    <!-- ADD EXISTING BATCH MODAL -->
+    <!-- SCAN TO ADD TO EXISTING BATCH MODAL -->
     <div class="modal-overlay" id="addBatchModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -343,14 +347,21 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Select Product</label>
-                    <select id="existing-product-select"></select>
+                    <label>Scan Existing Barcode</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="exist-barcode" placeholder="Scan or type barcode" oninput="checkExistingBarcode()">
+                        <button class="btn btn-warning" style="padding:0 15px;" onclick="startScanner('addExisting')">📷 Scan</button>
+                    </div>
+                    <p id="exist-product-name" style="margin-top: 12px; font-weight: 600; font-size: 0.95rem;"></p>
+                    <input type="hidden" id="exist-item-id">
                 </div>
                 
-                <!-- Expiration Date Columns -->
                 <div class="form-group">
-                    <label>Expiration Date</label>
-                    <div class="date-columns">
+                    <label>New Expiration Date</label>
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
+                        <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')"> No Expiration Date
+                    </label>
+                    <div class="date-columns" id="exist-date-columns">
                         <select id="exist-exp-month">
                             <option value="" disabled selected>Month</option>
                             <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
@@ -370,13 +381,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Quantity</label>
+                    <label>Quantity to Add</label>
                     <input type="number" id="exist-qty" value="1" min="1">
                 </div>
             </div>
             <div class="modal-actions">
                 <button class="btn" style="background:#f1f2f6; color:#2f3542;" onclick="closeAddBatchModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveExistingBatch()">Add Stock</button>
+                <button class="btn btn-primary" onclick="saveExistingBatch()">Add Stock Batch</button>
             </div>
         </div>
     </div>
@@ -401,16 +412,48 @@
     <div id="receipt-canvas" style="position:fixed; top:-9999px; width:420px; background:#fff; padding:40px; color:#000;"></div>
 
     <script>
+        const EMAILJS_PUBLIC_KEY = "eRoaGvs5CAfhTpWf2";  
+        const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
+        const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
+
+        if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+        }
+
         let inventoryData = JSON.parse(localStorage.getItem('premiumInventoryDataV3')) || [];
         let base64ImageString = ""; 
         let html5QrcodeScanner = null;
         let currentScannerMode = ""; 
 
-        // --- GMAIL SIGNUP FLOW ---
+        // HELPER: Convert text to Title Case (Capital Letter)
+        function toTitleCase(str) {
+            if (!str) return "";
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        // TOGGLE NO EXPIRY VIEW
+        function toggleNoExp(mode) {
+            const isChecked = document.getElementById(`${mode}-no-exp`).checked;
+            const dateColumns = document.getElementById(`${mode}-date-columns`);
+            if (isChecked) {
+                dateColumns.style.opacity = '0.3';
+                dateColumns.style.pointerEvents = 'none';
+            } else {
+                dateColumns.style.opacity = '1';
+                dateColumns.style.pointerEvents = 'auto';
+            }
+        }
+
+        // --- GMAIL & NICKNAME FLOW ---
         function checkLogin() {
             const email = localStorage.getItem('inventoryEmail');
+            const nickname = localStorage.getItem('inventoryNickname');
             if (email) {
                 document.getElementById('login-overlay').style.display = 'none';
+                if (nickname) {
+                    document.getElementById('display-nickname').innerText = nickname;
+                    document.getElementById('user-badge').style.display = 'inline-flex';
+                }
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
             }
@@ -419,34 +462,44 @@
         function registerAccount() {
             const nickname = document.getElementById('nickname-input').value.trim();
             const email = document.getElementById('email-input').value.trim();
+            const signupBtn = document.getElementById('signup-btn');
+
             if (nickname && email.includes('@')) {
+                signupBtn.innerText = "Processing...";
+                signupBtn.disabled = true;
+
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
-                
-                // SIMULATED GMAIL CONFIRMATION ALERT
-                alert(`✅ Registration Successful!\n\nA confirmation email has been sent to your Gmail: ${email}\nPlease check your inbox to confirm your account details.`);
-                
-                checkLogin();
-                showToast(`Welcome, ${nickname}! 🎉`);
+
+                if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
+                    setTimeout(() => {
+                        checkLogin();
+                        showToast(`Welcome, ${nickname}! 🎉`);
+                    }, 500);
+                    return;
+                }
+
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name: nickname, to_email: email })
+                    .then(function(response) {
+                        checkLogin();
+                        showToast(`Welcome, ${nickname}! 🎉`);
+                    }, function(error) {
+                        alert(`❌ Failed to send email via EmailJS.`);
+                        signupBtn.innerText = "Sign Up & Enter";
+                        signupBtn.disabled = false;
+                    });
             } else {
                 alert("Please enter a valid nickname and Gmail address.");
             }
         }
 
-        // --- AUTO-SAVE FUNCTION ---
-        // Runs invisibly whenever data is manipulated
+        // --- CORE DATA / RENDER ENGINE ---
         function autoSaveData(silent = false) {
             localStorage.setItem('premiumInventoryDataV3', JSON.stringify(inventoryData));
             if(!silent) showToast("Changes Auto-Saved! 💾");
             renderApp();
         }
 
-        function generateDefaultImage(text) {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" style="background:%23f1f2f6"><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="40" font-weight="bold" fill="%23a4b0be">${text.charAt(0).toUpperCase()}</text></svg>`;
-            return "data:image/svg+xml;base64," + btoa(svg);
-        }
-
-        // --- RENDER ENGINE ---
         function renderApp() {
             const container = document.getElementById('app-content');
             container.innerHTML = '';
@@ -455,10 +508,6 @@
                 container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">No products yet. Click "+ Add New Product" to get started!</div>';
                 return;
             }
-
-            // Expiration top bar
-            let expiringHtml = renderExpiringSoonSection();
-            if(expiringHtml) container.innerHTML += expiringHtml;
 
             inventoryData.forEach((categoryGroup, index) => {
                 const section = document.createElement('div');
@@ -483,44 +532,13 @@
             populateCategorySelect();
         }
 
-        function renderExpiringSoonSection() {
-            const today = new Date();
-            let expiringItems = [];
-            inventoryData.forEach(group => {
-                group.items.forEach(item => {
-                    let expiringBatches = item.batches.filter(batch => {
-                        let expDate = new Date(batch.exp);
-                        if (isNaN(expDate.getTime())) return false;
-                        let diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-                        return diffDays >= 0 && diffDays <= 30;
-                    });
-                    if (expiringBatches.length > 0) {
-                        let clonedItem = JSON.parse(JSON.stringify(item));
-                        clonedItem.batches = expiringBatches;
-                        expiringItems.push(clonedItem);
-                    }
-                });
-            });
-            if (expiringItems.length === 0) return '';
-            let html = `
-            <div class="category-section glass" style="border-color:#ff4757; box-shadow: 0 4px 20px rgba(255, 71, 87, 0.15);">
-                <div class="category-header" onclick="toggleCategory('expiring')" style="background: rgba(255, 71, 87, 0.05);">
-                    <div class="category-title" style="color:#ff4757;">⚠️ Near Expiration (1 Month)<span class="badge" style="background:#ff4757;">${expiringItems.length}</span></div>
-                    <div class="category-icon" id="icon-expiring" style="transform: rotate(180deg);">▼</div>
-                </div>
-                <div class="category-content" id="content-expiring" style="display:block; border-top-color:rgba(255,71,87,0.2);"><div class="grid">
-            `;
-            expiringItems.forEach(item => { html += renderProductCard(item, true); });
-            html += `</div></div></div>`;
-            return html;
-        }
-
-        function renderProductCard(item, isExpiringContext = false) {
+        function renderProductCard(item) {
             let batchesHTML = '';
-            item.batches.forEach((batch, bIndex) => {
+            item.batches.forEach((batch) => {
+                const isNoExp = batch.exp === 'No Expiry';
                 batchesHTML += `
-                    <div class="batch-item">
-                        <span class="batch-exp">🗓️ ${batch.exp}</span>
+                    <div class="batch-item ${isNoExp ? 'no-exp' : ''}">
+                        <span class="batch-exp">${isNoExp ? '♾️ No Expiry' : '🗓️ ' + batch.exp}</span>
                         <div class="controls">
                             <button class="btn-qty" onclick="updateBatchQty('${item.id}', '${batch.exp}', -1)">-</button>
                             <span class="qty-display">${batch.qty}</span>
@@ -554,7 +572,174 @@
             }
         }
 
-        // --- CORE ACTIONS ---
+        // --- BARCODE ONLINE LOOKUP API (With Auto-Category & Capitalization) ---
+        async function checkBarcodeOnline() {
+            const barcode = document.getElementById('new-barcode').value.trim();
+            if (barcode.length < 8) return;
+
+            try {
+                let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                let data = await response.json();
+                
+                if(data.status === 1) {
+                    let product = data.product;
+                    
+                    if(product.product_name) {
+                        document.getElementById('new-name').value = toTitleCase(product.product_name);
+                    }
+                    
+                    if(product.categories) {
+                        let autoCat = toTitleCase(product.categories.split(',')[0].trim());
+                        let catSelect = document.getElementById('new-category');
+                        
+                        let optionExists = Array.from(catSelect.options).some(opt => opt.value === autoCat);
+                        if (!optionExists) {
+                            let newOption = new Option(autoCat, autoCat);
+                            catSelect.add(newOption, catSelect.options.length - 1);
+                        }
+                        catSelect.value = autoCat;
+                        handleCategoryChange();
+                    }
+
+                    if(product.image_url) {
+                        const preview = document.getElementById('img-preview');
+                        preview.src = product.image_url;
+                        preview.style.display = 'block';
+                        base64ImageString = product.image_url;
+                        showToast("Product Info & Category Found Online! 🌐");
+                    }
+                }
+            } catch(e) {
+                console.log("Barcode lookup failed or product not found.");
+            }
+        }
+
+        // --- NEW PRODUCT CREATION ---
+        function saveNewProduct() {
+            const barcode = document.getElementById('new-barcode').value.trim();
+            const rawName = document.getElementById('new-name').value.trim();
+            const name = toTitleCase(rawName);
+            
+            let category = document.getElementById('new-category').value;
+            const newCatName = toTitleCase(document.getElementById('new-category-name').value.trim());
+            const qty = parseInt(document.getElementById('new-qty').value);
+            
+            const isNoExp = document.getElementById('new-no-exp').checked;
+            let formattedDate = "No Expiry";
+
+            if (!name) return alert("Product name is required!");
+            if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
+
+            if (!isNoExp) {
+                const month = document.getElementById('new-exp-month').value;
+                const day = document.getElementById('new-exp-day').value;
+                const year = document.getElementById('new-exp-year').value;
+                if (!month || !day || !year) return alert("Please select the full Expiration Date or check 'No Expiration Date'.");
+                formattedDate = `${month} ${day}, ${year}`;
+            }
+
+            if (category === 'add_new_category') {
+                if (!newCatName) return alert("Please enter a name for your new category!");
+                category = newCatName; 
+            }
+
+            let finalImage = base64ImageString || "data:image/svg+xml;base64," + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" style="background:%23f1f2f6"><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="40" font-weight="bold" fill="%23a4b0be">${name.charAt(0).toUpperCase()}</text></svg>`);
+            
+            const newItem = { 
+                id: 'item_' + Date.now(), barcode: barcode, name: name, 
+                batches: [{ exp: formattedDate, qty: qty }], img: finalImage 
+            };
+
+            let categoryGroup = inventoryData.find(g => g.category.toLowerCase() === category.toLowerCase());
+            if (categoryGroup) { categoryGroup.items.push(newItem); } 
+            else { inventoryData.push({ category: category, items: [newItem] }); }
+            
+            closeModal();
+            autoSaveData();
+        }
+
+        // --- SCAN BARCODE TO ADD EXISTING BATCH ---
+        function checkExistingBarcode() {
+            const barcode = document.getElementById('exist-barcode').value.trim();
+            const nameDisplay = document.getElementById('exist-product-name');
+            const idInput = document.getElementById('exist-item-id');
+            idInput.value = '';
+
+            if (barcode.length < 3) {
+                nameDisplay.innerText = '';
+                return;
+            }
+
+            let foundItem = null;
+            for (let group of inventoryData) {
+                let item = group.items.find(i => i.barcode === barcode);
+                if (item) {
+                    foundItem = item;
+                    break;
+                }
+            }
+
+            if (foundItem) {
+                nameDisplay.innerHTML = `✅ Matching Product Found: <span style="color:var(--primary);">${foundItem.name}</span>`;
+                nameDisplay.style.color = 'var(--success)';
+                idInput.value = foundItem.id;
+            } else {
+                nameDisplay.innerText = `❌ Product not found in your inventory. Add as a New Product instead.`;
+                nameDisplay.style.color = 'var(--danger)';
+            }
+        }
+
+        function openAddBatchModal() { document.getElementById('addBatchModal').classList.add('active'); }
+        
+        function closeAddBatchModal() {
+            document.getElementById('addBatchModal').classList.remove('active');
+            document.getElementById('exist-barcode').value = "";
+            document.getElementById('exist-product-name').innerText = "";
+            document.getElementById('exist-item-id').value = "";
+            document.getElementById('exist-no-exp').checked = false;
+            toggleNoExp('exist');
+            document.getElementById('exist-exp-month').value = "";
+            document.getElementById('exist-exp-day').value = "";
+            document.getElementById('exist-exp-year').value = "";
+            document.getElementById('exist-qty').value = "1";
+        }
+
+        function saveExistingBatch() {
+            const itemId = document.getElementById('exist-item-id').value;
+            if (!itemId) return alert("Please scan or enter a valid barcode that exists in your inventory.");
+
+            const isNoExp = document.getElementById('exist-no-exp').checked;
+            let formattedDate = "No Expiry";
+            const qty = parseInt(document.getElementById('exist-qty').value);
+
+            if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
+
+            if (!isNoExp) {
+                const month = document.getElementById('exist-exp-month').value;
+                const day = document.getElementById('exist-exp-day').value;
+                const year = document.getElementById('exist-exp-year').value;
+                if (!month || !day || !year) return alert("Please select the full Expiration Date or check 'No Expiration Date'.");
+                formattedDate = `${month} ${day}, ${year}`;
+            }
+
+            for (let group of inventoryData) {
+                let item = group.items.find(i => i.id === itemId);
+                if (item) {
+                    let existingBatch = item.batches.find(b => b.exp === formattedDate);
+                    if (existingBatch) {
+                        existingBatch.qty += qty;
+                    } else {
+                        item.batches.push({ exp: formattedDate, qty: qty });
+                    }
+                    closeAddBatchModal();
+                    autoSaveData();
+                    showToast("New Batch Expiration Added! ✅");
+                    return;
+                }
+            }
+        }
+
+        // --- UTILITY/DELETE FUNCTIONS ---
         function updateBatchQty(itemId, batchExp, change) {
             for (let group of inventoryData) {
                 let item = group.items.find(i => i.id === itemId);
@@ -565,11 +750,9 @@
                         if (batch.qty <= 0) {
                             if(confirm("Quantity is 0. Delete this expiration batch?")) {
                                 item.batches.splice(item.batches.indexOf(batch), 1);
-                            } else {
-                                batch.qty = 1; 
-                            }
+                            } else { batch.qty = 1; }
                         }
-                        autoSaveData(true); // Auto saves silently
+                        autoSaveData(true);
                         return;
                     }
                 }
@@ -582,7 +765,7 @@
                 const itemIndex = group.items.findIndex(i => i.id === itemId);
                 if (itemIndex !== -1) {
                     group.items.splice(itemIndex, 1);
-                    autoSaveData(); // Auto saves
+                    autoSaveData();
                     break;
                 }
             }
@@ -591,142 +774,18 @@
         function deleteCategory(index) {
             if (confirm(`Delete the "${inventoryData[index].category}" category?`)) {
                 inventoryData.splice(index, 1);
-                autoSaveData(); // Auto saves
+                autoSaveData();
             }
         }
 
-        // --- BARCODE ONLINE LOOKUP API ---
-        async function checkBarcodeOnline() {
-            const barcode = document.getElementById('new-barcode').value.trim();
-            if (barcode.length < 8) return; // Wait until typical barcode length
-
-            // We use OpenFoodFacts as a free, no-key global database alternative to Google Images 
-            // since client-side Google scraping is blocked by CORS.
-            try {
-                let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                let data = await response.json();
-                
-                if(data.status === 1) {
-                    let product = data.product;
-                    if(product.product_name) {
-                        document.getElementById('new-name').value = product.product_name;
-                    }
-                    if(product.image_url) {
-                        const preview = document.getElementById('img-preview');
-                        preview.src = product.image_url;
-                        preview.style.display = 'block';
-                        base64ImageString = product.image_url; // We save the URL directly
-                        showToast("Product Info Found Online! 🌐");
-                    }
-                }
-            } catch(e) {
-                console.log("Barcode lookup failed or product not in open database.");
-            }
-        }
-
-        // --- NEW PRODUCT CREATION ---
-        function saveNewProduct() {
-            const barcode = document.getElementById('new-barcode').value.trim();
-            const name = document.getElementById('new-name').value.trim();
-            let category = document.getElementById('new-category').value;
-            const newCatName = document.getElementById('new-category-name').value.trim();
-            const qty = parseInt(document.getElementById('new-qty').value);
-            
-            // Collect Date from Columns
-            const month = document.getElementById('new-exp-month').value;
-            const day = document.getElementById('new-exp-day').value;
-            const year = document.getElementById('new-exp-year').value;
-
-            if (!name) return alert("Product name is required!");
-            if (!month || !day || !year) return alert("Please select the full Expiration Date (Month, Day, Year).");
-            if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
-
-            if (category === 'add_new_category') {
-                if (!newCatName) return alert("Please enter a name for your new category!");
-                category = newCatName; 
-            }
-
-            const formattedDate = `${month} ${day}, ${year}`;
-            let finalImage = base64ImageString || generateDefaultImage(name);
-            
-            const newItem = { 
-                id: 'item_' + Date.now(), barcode: barcode, name: name, 
-                batches: [{ exp: formattedDate, qty: qty }], img: finalImage 
-            };
-
-            let categoryGroup = inventoryData.find(g => g.category.toLowerCase() === category.toLowerCase());
-            if (categoryGroup) { categoryGroup.items.push(newItem); } 
-            else { inventoryData.push({ category: category, items: [newItem] }); }
-            
-            closeModal();
-            autoSaveData(); // Auto Saves Data instantly
-        }
-
-        // --- ADD BATCH TO EXISTING PRODUCT ---
-        function openAddBatchModal() {
-            const select = document.getElementById('existing-product-select');
-            select.innerHTML = '';
-            let hasProducts = false;
-
-            inventoryData.forEach(group => {
-                group.items.forEach(item => {
-                    hasProducts = true;
-                    select.innerHTML += `<option value="${item.id}">${item.name} (${group.category})</option>`;
-                });
-            });
-
-            if (!hasProducts) {
-                alert("You have no existing products yet. Add a new product first.");
-                return;
-            }
-
-            document.getElementById('addBatchModal').classList.add('active');
-        }
-
-        function closeAddBatchModal() {
-            document.getElementById('addBatchModal').classList.remove('active');
-            // Reset fields
-            document.getElementById('exist-exp-month').value = "";
-            document.getElementById('exist-exp-day').value = "";
-            document.getElementById('exist-exp-year').value = "";
-            document.getElementById('exist-qty').value = "1";
-        }
-
-        function saveExistingBatch() {
-            const itemId = document.getElementById('existing-product-select').value;
-            const month = document.getElementById('exist-exp-month').value;
-            const day = document.getElementById('exist-exp-day').value;
-            const year = document.getElementById('exist-exp-year').value;
-            const qty = parseInt(document.getElementById('exist-qty').value);
-
-            if (!month || !day || !year) return alert("Please select the full Expiration Date.");
-            if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
-
-            const formattedDate = `${month} ${day}, ${year}`;
-
-            for (let group of inventoryData) {
-                let item = group.items.find(i => i.id === itemId);
-                if (item) {
-                    // Check if identical expiration already exists to merge
-                    let existingBatch = item.batches.find(b => b.exp === formattedDate);
-                    if (existingBatch) {
-                        existingBatch.qty += qty;
-                    } else {
-                        item.batches.push({ exp: formattedDate, qty: qty });
-                    }
-                    closeAddBatchModal();
-                    autoSaveData(); // Auto saves instantly
-                    return;
-                }
-            }
-        }
-
-        // --- MODALS & SCANNERS ---
+        // --- SCANNERS & MODALS ---
         function openModal() { document.getElementById('productModal').classList.add('active'); }
         function closeModal() { 
             document.getElementById('productModal').classList.remove('active'); 
             document.getElementById('new-barcode').value = '';
             document.getElementById('new-name').value = '';
+            document.getElementById('new-no-exp').checked = false;
+            toggleNoExp('new');
             document.getElementById('new-exp-month').value = '';
             document.getElementById('new-exp-day').value = '';
             document.getElementById('new-exp-year').value = '';
@@ -764,11 +823,13 @@
             closeScanner();
             if (currentScannerMode === 'addModal') {
                 document.getElementById('new-barcode').value = decodedText;
-                checkBarcodeOnline(); // Triggers the online image fetch automatically!
-            } else if (currentScannerMode === 'consume') {
-                alert(`Scanned: ${decodedText}. Find it in the list to update quantity.`);
+                checkBarcodeOnline();
+            } else if (currentScannerMode === 'addExisting') {
+                document.getElementById('exist-barcode').value = decodedText;
+                checkExistingBarcode();
             }
         }
+
         function closeScanner() {
             if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                 html5QrcodeScanner.stop().then(() => { document.getElementById('scannerModal').classList.remove('active'); });
@@ -783,7 +844,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    canvas.width = 400; canvas.height = 400; // Resize
+                    canvas.width = 400; canvas.height = 400;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, 400, 400);
                     base64ImageString = canvas.toDataURL('image/jpeg', 0.8);
@@ -803,7 +864,7 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        // --- VISUAL RECEIPT FEATURE ---
+        // --- RECEIPT DOWNLOAD ---
         function generateReceipt() {
             const receiptDiv = document.getElementById('receipt-canvas');
             const now = new Date();
@@ -818,7 +879,7 @@
                 receiptHTML += `<div style="margin-top:25px; font-weight:700; border-bottom:2px solid #dfe6e9; font-size:20px; padding-bottom:8px;">${group.category}</div>`;
                 group.items.forEach(item => {
                     let totalQty = item.batches.reduce((sum, batch) => sum + batch.qty, 0);
-                    let batchStrings = item.batches.map(b => `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
+                    let batchStrings = item.batches.map(b => b.exp === 'No Expiry' ? `${b.qty}pcs (No Expiry)` : `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
                     receiptHTML += `
                         <div style="display:flex; align-items:center; gap:15px; margin-top:12px;">
                             <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" crossorigin="anonymous">
