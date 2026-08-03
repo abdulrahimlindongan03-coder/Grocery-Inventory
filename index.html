@@ -343,7 +343,7 @@
                         <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')"> No Expiration Date
                     </label>
                     <div id="new-date-columns">
-                        <input type="date" id="new-exp-date" placeholder="MM/DD/YYYY">
+                        <input type="text" id="new-exp-date" placeholder="Type date (e.g., 12/25/2026 or Dec 2026)">
                     </div>
                 </div>
                 
@@ -420,7 +420,7 @@
                         <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')"> No Expiration Date
                     </label>
                     <div id="exist-date-columns">
-                        <input type="date" id="exist-exp-date" placeholder="MM/DD/YYYY">
+                        <input type="text" id="new-exp-date" placeholder="Type date (e.g., 12/25/2026 or Dec 2026)">
                     </div>
                 </div>
                 
@@ -847,10 +847,10 @@
             if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
 
             if (!isNoExp) {
-                const dateVal = document.getElementById('new-exp-date').value;
-                if (!dateVal) return alert("Please select an Expiration Date or check 'No Expiration Date'.");
-                formattedDate = formatDateToMMDDYYYY(dateVal);
-            }
+    const dateVal = document.getElementById('new-exp-date').value.trim();
+    if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
+    formattedDate = dateVal; // Accept exactly what the user typed
+}
 
             if (category === 'add_new_category') {
                 if (!newCatName) return alert("Please enter a name for your new category!");
@@ -1032,10 +1032,10 @@
             if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
 
             if (!isNoExp) {
-                const dateVal = document.getElementById('exist-exp-date').value;
-                if (!dateVal) return alert("Please select an Expiration Date or check 'No Expiration Date'.");
-                formattedDate = formatDateToMMDDYYYY(dateVal);
-            }
+    const dateVal = document.getElementById('exist-exp-date').value.trim();
+    if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
+    formattedDate = dateVal; // Accept exactly what the user typed
+}
 
             for (let group of inventoryData) {
                 let item = group.items.find(i => i.id === itemId);
