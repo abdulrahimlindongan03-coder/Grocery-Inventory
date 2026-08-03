@@ -133,6 +133,16 @@
         .category-content { display: none; padding: 25px; border-top: 1px solid var(--glass-border); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        /* 2-Column layout for phones */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .card-title { font-size: 0.95rem; }
+            .card-img-wrapper { height: 120px; }
+            .category-header { padding: 15px; }
+            .category-title { font-size: 1.1rem; }
+        }
+
         .card {
             background: var(--glass-card); border-radius: var(--radius-md);
             overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -161,7 +171,7 @@
         .batch-item {
             display: flex; justify-content: space-between; align-items: center;
             background: #f1f2f6; padding: 8px 12px; border-radius: 12px;
-            border-left: 4px solid var(--primary);
+            border-left: 4px solid var(--primary); flex-wrap: wrap; gap: 5px;
         }
         .batch-item.no-exp { border-left-color: #00f2fe; background: #f0fbff; }
         .batch-item.exp-warning { border-left-color: var(--warning); background: #fffdf0; }
@@ -205,16 +215,14 @@
 
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: #2f3542;}
-        .form-group input[type="text"], .form-group input[type="number"], .form-group input[type="email"], .form-group select {
+        .form-group input[type="text"], .form-group input[type="number"], .form-group input[type="email"], .form-group input[type="date"], .form-group select {
             width: 100%; padding: 12px 16px; border: 2px solid #dfe4ea; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s; background: #ffffff;
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
         .form-group input[type="text"].capitalize { text-transform: capitalize; }
         
         .input-with-btn { display: flex; gap: 10px; }
-        .date-columns { display: flex; gap: 10px; transition: opacity 0.3s ease; }
-        .date-columns select { flex: 1; }
-
+        
         .file-upload-wrapper {
             border: 2px dashed #a4b0be; padding: 25px 15px; text-align: center;
             border-radius: 12px; background: #f1f2f6; cursor: pointer; transition: 0.3s; font-weight: 500; color: #57606f;
@@ -222,7 +230,7 @@
         .file-upload-wrapper:hover { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
         
         #img-preview, #edit-img-preview { max-width: 100%; height: 140px; object-fit: contain; display: none; margin: 15px auto 0; border-radius: 10px; }
-        #scanner-container { width: 100%; border-radius: 16px; overflow: hidden; background: #000; margin-bottom: 15px; }
+        #scanner-container { width: 100%; border-radius: 16px; overflow: hidden; background: #000; margin-bottom: 15px; position: relative;}
         
         .modal-actions { margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px; }
 
@@ -239,16 +247,16 @@
             background: rgba(255,255,255,0.3); backdrop-filter: blur(15px);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
-        .login-box { padding: 40px; text-align: center; width: 90%; max-width: 400px; }
+        .login-box { padding: 40px; text-align: center; width: 90%; max-width: 450px; }
     </style>
 </head>
 <body>
 
-    <!-- Login Overlay -->
+    <!-- Welcome / Login Overlay -->
     <div id="login-overlay">
         <div class="glass login-box">
-            <h2>✨ Smart Inventory</h2>
-            <p style="margin: 15px 0; color: var(--text-muted);">Register your Gmail to receive auto-confirmations and automatic daily expiry alerts.</p>
+            <h2>👋 Welcome to Smart Inventory!</h2>
+            <p style="margin: 15px 0; color: var(--text-muted);">Please enter your details before accessing your dashboard.</p>
             
             <div class="form-group" style="text-align: left;">
                 <label>Nickname</label>
@@ -259,17 +267,17 @@
                 <input type="email" id="email-input" placeholder="e.g. name@gmail.com">
             </div>
 
-            <button class="btn btn-primary" style="width: 100%;" id="signup-btn" onclick="registerAccount()">Sign Up & Enter</button>
+            <button class="btn btn-primary" style="width: 100%;" id="signup-btn" onclick="registerAccount()">Enter Dashboard 🚀</button>
         </div>
     </div>
 
     <div class="container">
         <header class="glass">
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h1>✨ RML Smart Inventory</h1>
+                <h1>✨ Smart Inventory</h1>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="user-badge" id="user-badge">👤 <span id="display-nickname">User</span></div>
-                    <p id="welcome-msg" style="margin:0;">School Supplies & Auto-Email Expiry Tracking Active.</p>
+                    <p id="welcome-msg" style="margin:0;">Dashboard & Stock Tracking Active.</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -278,7 +286,7 @@
             </div>
         </header>
 
-        <!-- EXPIRING SOON ALERT BANNER AT TOP -->
+        <!-- EXPIRING SOON ALERT BANNER -->
         <div id="expiry-alert-banner">
             <h3>⚠️ Expiry Warning Notice</h3>
             <div class="alert-item-list" id="expiry-alert-list"></div>
@@ -301,12 +309,12 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Barcode / School Supply Keyword Lookup</label>
+                    <label>Barcode / Image Lookup</label>
                     <div class="input-with-btn">
-                        <input type="text" id="new-barcode" placeholder="Scan barcode or type item (e.g. pencil, pen)" oninput="checkBarcodeOnline()">
+                        <input type="text" id="new-barcode" placeholder="Scan barcode or type item" oninput="checkBarcodeOnline()">
                         <button class="btn btn-warning" style="padding:0 15px;" onclick="startScanner('addModal')">📷 Scan</button>
                     </div>
-                    <small style="color:var(--text-muted); font-size:0.8rem;">Auto-detects school supplies, groceries, names, images, & categories!</small>
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Auto-fetches image online based on barcode!</small>
                 </div>
                 
                 <div class="form-group">
@@ -315,7 +323,9 @@
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <select id="new-category" onchange="handleCategoryChange()"></select>
+                    <select id="new-category" onchange="handleCategoryChange()">
+                        <!-- Options generated in JS -->
+                    </select>
                     <input type="text" id="new-category-name" class="capitalize" placeholder="Type new category name..." style="display:none; margin-top:10px;">
                 </div>
                 <div class="form-group">
@@ -330,24 +340,10 @@
                 <div class="form-group">
                     <label>Expiration Date</label>
                     <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
-                        <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')" checked> No Expiration Date (Recommended for School Supplies)
+                        <input type="checkbox" id="new-no-exp" onchange="toggleNoExp('new')"> No Expiration Date
                     </label>
-                    <div class="date-columns" id="new-date-columns" style="opacity:0.3; pointer-events:none;">
-                        <select id="new-exp-month">
-                            <option value="" disabled selected>Month</option>
-                            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-                            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-                            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-                            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-                        </select>
-                        <select id="new-exp-day">
-                            <option value="" disabled selected>Day</option>
-                            <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                        </select>
-                        <select id="new-exp-year">
-                            <option value="" disabled selected>Year</option>
-                            <script>for(let i=2024; i<=2035; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                        </select>
+                    <div id="new-date-columns">
+                        <input type="date" id="new-exp-date" placeholder="MM/DD/YYYY">
                     </div>
                 </div>
                 
@@ -421,24 +417,10 @@
                 <div class="form-group">
                     <label>New Expiration Date</label>
                     <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:8px; cursor:pointer;">
-                        <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')" checked> No Expiration Date
+                        <input type="checkbox" id="exist-no-exp" onchange="toggleNoExp('exist')"> No Expiration Date
                     </label>
-                    <div class="date-columns" id="exist-date-columns" style="opacity:0.3; pointer-events:none;">
-                        <select id="exist-exp-month">
-                            <option value="" disabled selected>Month</option>
-                            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-                            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-                            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-                            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-                        </select>
-                        <select id="exist-exp-day">
-                            <option value="" disabled selected>Day</option>
-                            <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                        </select>
-                        <select id="exist-exp-year">
-                            <option value="" disabled selected>Year</option>
-                            <script>for(let i=2024; i<=2035; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                        </select>
+                    <div id="exist-date-columns">
+                        <input type="date" id="exist-exp-date" placeholder="MM/DD/YYYY">
                     </div>
                 </div>
                 
@@ -465,6 +447,9 @@
                 <div id="scanner-container">
                     <div id="interactive-reader" style="width:100%;"></div>
                 </div>
+                <div style="text-align: center;">
+                    <button class="btn btn-info" id="flash-btn" style="display:none; margin-bottom: 15px;" onclick="toggleFlash()">🔦 Toggle Flash</button>
+                </div>
                 <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem;">Position barcode inside camera frame</p>
             </div>
         </div>
@@ -478,7 +463,7 @@
         const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
         const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
 
-        if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+        if (EMAILJS_PUBLIC_KEY !== "s9JVqJECJ6GtFy_70") {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
@@ -487,10 +472,20 @@
         let editBase64ImageString = "";
         let html5QrcodeScanner = null;
         let currentScannerMode = ""; 
+        let torchOn = false;
 
         function toTitleCase(str) {
             if (!str) return "";
             return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        function formatDateToMMDDYYYY(dateString) {
+            if (!dateString) return null;
+            const d = new Date(dateString);
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const day = d.getDate().toString().padStart(2, '0');
+            const year = d.getFullYear();
+            return `${month}/${day}/${year}`;
         }
 
         function toggleNoExp(mode) {
@@ -499,6 +494,7 @@
             if (isChecked) {
                 dateColumns.style.opacity = '0.3';
                 dateColumns.style.pointerEvents = 'none';
+                document.getElementById(`${mode}-exp-date`).value = '';
             } else {
                 dateColumns.style.opacity = '1';
                 dateColumns.style.pointerEvents = 'auto';
@@ -556,7 +552,7 @@
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
 
-                if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
+                if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
                     setTimeout(() => {
                         checkLogin();
                         showToast(`Welcome, ${nickname}! 🎉`);
@@ -570,7 +566,7 @@
                         showToast(`Welcome, ${nickname}! 🎉`);
                     }, function(error) {
                         alert(`❌ Failed to send email via EmailJS.`);
-                        signupBtn.innerText = "Sign Up & Enter";
+                        signupBtn.innerText = "Enter Dashboard 🚀";
                         signupBtn.disabled = false;
                     });
             } else {
@@ -581,7 +577,7 @@
         function checkAndSendAutomaticEmail() {
             const email = localStorage.getItem('inventoryEmail');
             const nickname = localStorage.getItem('inventoryNickname');
-            if (!email || EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") return;
+            if (!email || EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") return;
 
             const todayStr = new Date().toDateString();
             const lastSent = localStorage.getItem('lastAutoExpiryEmailDate');
@@ -635,7 +631,7 @@
                 return alert("Great news! No products are nearing expiration or expired right now.");
             }
 
-            if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
+            if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
                 return alert("EmailJS Public Key is not configured. Update the code with your keys to enable Gmail alerts.");
             }
 
@@ -669,12 +665,15 @@
             if (inventoryData.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">No products yet. Click "+ Add New Product" to get started!</div>';
                 alertBanner.style.display = 'none';
+                populateCategorySelect();
                 return;
             }
 
             inventoryData.forEach((categoryGroup, index) => {
                 const section = document.createElement('div');
                 section.className = 'category-section glass';
+                
+                // Changed display to none and rotation to 0deg to hide by default
                 const headerHTML = `
                     <div class="category-header" onclick="toggleCategory(${index})">
                         <div class="category-title">
@@ -682,11 +681,11 @@
                             <span class="badge">${categoryGroup.items.length}</span>
                             <button class="btn-delete" style="margin-left: 15px;" onclick="event.stopPropagation(); deleteCategory(${index})">Delete 🗑️</button>
                         </div>
-                        <div class="category-icon" id="icon-${index}" style="transform: rotate(180deg);">▼</div>
+                        <div class="category-icon" id="icon-${index}" style="transform: rotate(0deg); transition: 0.3s;">▼</div>
                     </div>
                 `;
 
-                let gridHTML = `<div class="category-content" id="content-${index}" style="display:block;"><div class="grid">`;
+                let gridHTML = `<div class="category-content" id="content-${index}" style="display:none;"><div class="grid">`;
                 
                 categoryGroup.items.forEach(item => { 
                     gridHTML += renderProductCard(item); 
@@ -769,6 +768,7 @@
             const inputVal = document.getElementById('new-barcode').value.trim();
             if (inputVal.length < 3) return;
 
+            // Search OpenFoodFacts for image/name based on barcode
             if (inputVal.length >= 8 && !isNaN(inputVal)) {
                 try {
                     let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${inputVal}.json`);
@@ -776,17 +776,14 @@
                     if(data.status === 1 && data.product && data.product.product_name) {
                         let product = data.product;
                         document.getElementById('new-name').value = toTitleCase(product.product_name);
-                        if(product.categories) {
-                            let autoCat = toTitleCase(product.categories.split(',')[0].trim());
-                            setCategoryDropdown(autoCat);
-                        }
+                        
                         if(product.image_url) {
                             const preview = document.getElementById('img-preview');
                             preview.src = product.image_url;
                             preview.style.display = 'block';
                             base64ImageString = product.image_url;
                         }
-                        showToast("Product Found Online! 🌐");
+                        showToast("Product & Image Found Online! 🌐");
                         return;
                     }
                 } catch(e) {
@@ -794,43 +791,31 @@
                 }
             }
 
-            const schoolSuppliesDB = {
-                "pencil": { name: "No. 2 Graphite Pencil", cat: "School Supplies", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&auto=format&fit=crop&q=60" },
-                "pen": { name: "Ballpoint Gel Pen (Black/Blue)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1585336261022-62167dde1cf8?w=400&auto=format&fit=crop&q=60" },
-                "notebook": { name: "Spiral Notebook (80 Leaves)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&auto=format&fit=crop&q=60" },
-                "paper": { name: "Bond Paper Ream (Substance 20)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=400&auto=format&fit=crop&q=60" },
-                "eraser": { name: "White Pearl Eraser", cat: "School Supplies", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=60" },
-                "marker": { name: "Permanent Marker (Black)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1569683795645-b62e50fbf103?w=400&auto=format&fit=crop&q=60" },
-                "binder": { name: "Ring Binder Folder", cat: "School Supplies", img: "https://images.unsplash.com/photo-1607434472257-d9f8e5a04f33?w=400&auto=format&fit=crop&q=60" },
-                "folder": { name: "Index Folder with Pocket", cat: "School Supplies", img: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=60" },
-                "scissors": { name: "Stainless Steel Student Scissors", cat: "School Supplies", img: "https://images.unsplash.com/photo-1595246140590-674b4a3c1137?w=400&auto=format&fit=crop&q=60" },
-                "glue": { name: "Washable School Glue Stick", cat: "School Supplies", img: "https://images.unsplash.com/photo-1572375309998-2b89f7866428?w=400&auto=format&fit=crop&q=60" },
-                "ruler": { name: "12-Inch Plastic Ruler", cat: "School Supplies", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=60" },
-                "highlighter": { name: "Neon Yellow Highlighter", cat: "School Supplies", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&auto=format&fit=crop&q=60" },
-                "crayon": { name: "Crayola Wax Crayons (24 Colors)", cat: "School Supplies", img: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400&auto=format&fit=crop&q=60" },
-                "calculator": { name: "Scientific Calculator", cat: "School Supplies", img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&auto=format&fit=crop&q=60" }
+            // Fallback mock database
+            const localDB = {
+                "pencil": { name: "No. 2 Graphite Pencil", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&auto=format&fit=crop&q=60" },
+                "pen": { name: "Ballpoint Gel Pen", img: "https://images.unsplash.com/photo-1585336261022-62167dde1cf8?w=400&auto=format&fit=crop&q=60" },
+                "notebook": { name: "Spiral Notebook", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&auto=format&fit=crop&q=60" }
             };
 
             const lowerInput = inputVal.toLowerCase();
             let matchedItem = null;
 
-            for (let key in schoolSuppliesDB) {
+            for (let key in localDB) {
                 if (lowerInput.includes(key)) {
-                    matchedItem = schoolSuppliesDB[key];
+                    matchedItem = localDB[key];
                     break;
                 }
             }
 
             if (matchedItem) {
                 document.getElementById('new-name').value = matchedItem.name;
-                setCategoryDropdown(matchedItem.cat);
-                
                 const preview = document.getElementById('img-preview');
                 preview.src = matchedItem.img;
                 preview.style.display = 'block';
                 base64ImageString = matchedItem.img;
                 
-                showToast("School Supply Auto-Fetched! 📚");
+                showToast("Image Auto-Fetched! 📸");
             }
         }
 
@@ -858,14 +843,13 @@
             let formattedDate = "No Expiry";
 
             if (!name) return alert("Product name is required!");
+            if (!category) return alert("Please select a category or add a new one!");
             if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
 
             if (!isNoExp) {
-                const month = document.getElementById('new-exp-month').value;
-                const day = document.getElementById('new-exp-day').value;
-                const year = document.getElementById('new-exp-year').value;
-                if (!month || !day || !year) return alert("Please select the full Expiration Date or check 'No Expiration Date'.");
-                formattedDate = `${month} ${day}, ${year}`;
+                const dateVal = document.getElementById('new-exp-date').value;
+                if (!dateVal) return alert("Please select an Expiration Date or check 'No Expiration Date'.");
+                formattedDate = formatDateToMMDDYYYY(dateVal);
             }
 
             if (category === 'add_new_category') {
@@ -1031,11 +1015,9 @@
             document.getElementById('exist-barcode').value = "";
             document.getElementById('exist-product-name').innerText = "";
             document.getElementById('exist-item-id').value = "";
-            document.getElementById('exist-no-exp').checked = true;
+            document.getElementById('exist-no-exp').checked = false;
             toggleNoExp('exist');
-            document.getElementById('exist-exp-month').value = "";
-            document.getElementById('exist-exp-day').value = "";
-            document.getElementById('exist-exp-year').value = "";
+            document.getElementById('exist-exp-date').value = "";
             document.getElementById('exist-qty').value = "1";
         }
 
@@ -1050,11 +1032,9 @@
             if (isNaN(qty) || qty <= 0) return alert("Quantity must be at least 1.");
 
             if (!isNoExp) {
-                const month = document.getElementById('exist-exp-month').value;
-                const day = document.getElementById('exist-exp-day').value;
-                const year = document.getElementById('exist-exp-year').value;
-                if (!month || !day || !year) return alert("Please select the full Expiration Date or check 'No Expiration Date'.");
-                formattedDate = `${month} ${day}, ${year}`;
+                const dateVal = document.getElementById('exist-exp-date').value;
+                if (!dateVal) return alert("Please select an Expiration Date or check 'No Expiration Date'.");
+                formattedDate = formatDateToMMDDYYYY(dateVal);
             }
 
             for (let group of inventoryData) {
@@ -1117,23 +1097,34 @@
             document.getElementById('productModal').classList.remove('active'); 
             document.getElementById('new-barcode').value = '';
             document.getElementById('new-name').value = '';
-            document.getElementById('new-no-exp').checked = true;
+            
+            // Set un-checked by default so user has to do it manually
+            document.getElementById('new-no-exp').checked = false;
             toggleNoExp('new');
-            document.getElementById('new-exp-month').value = '';
-            document.getElementById('new-exp-day').value = '';
-            document.getElementById('new-exp-year').value = '';
+            
+            document.getElementById('new-exp-date').value = '';
+            
+            // Start at 1
+            document.getElementById('new-qty').value = '1';
+            
             document.getElementById('new-file').value = '';
             document.getElementById('img-preview').style.display = 'none';
             base64ImageString = "";
+
+            // Reset category selection
+            document.getElementById('new-category').value = "";
+            handleCategoryChange();
         }
         
         function populateCategorySelect() {
             const select = document.getElementById('new-category');
             if(!select) return;
-            select.innerHTML = '';
+            
+            // Blank category by default
+            select.innerHTML = '<option value="" disabled selected>Select Category</option>';
+            
             inventoryData.forEach(group => { select.innerHTML += `<option value="${group.category}">${group.category}</option>`; });
             select.innerHTML += `<option value="add_new_category" style="font-weight:bold; color:var(--primary);">➕ Add New Category...</option>`;
-            if(inventoryData.length === 0) select.value = 'add_new_category';
             handleCategoryChange(); 
         }
         
@@ -1148,8 +1139,26 @@
             currentScannerMode = mode;
             document.getElementById('scannerModal').classList.add('active');
             if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("interactive-reader");
+            
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } }, onScanSuccess)
+                .then(() => {
+                    // Check if torch (flash) is available
+                    const track = html5QrcodeScanner.getRunningTrackCameraCapabilities();
+                    if (track && track.torchFeature().isSupported()) {
+                        document.getElementById('flash-btn').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('flash-btn').style.display = 'none';
+                    }
+                })
                 .catch(err => { alert("Camera access failed."); closeScanner(); });
+        }
+
+        function toggleFlash() {
+            if (html5QrcodeScanner && html5QrcodeScanner.getState() === Html5QrcodeScannerState.SCANNING) {
+                torchOn = !torchOn;
+                html5QrcodeScanner.applyVideoConstraints({ advanced: [{ torch: torchOn }] });
+                showToast(torchOn ? "Flash ON 🔦" : "Flash OFF");
+            }
         }
 
         function onScanSuccess(decodedText) {
@@ -1167,6 +1176,8 @@
             if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                 html5QrcodeScanner.stop().then(() => { document.getElementById('scannerModal').classList.remove('active'); });
             } else { document.getElementById('scannerModal').classList.remove('active'); }
+            document.getElementById('flash-btn').style.display = 'none';
+            torchOn = false;
         }
 
         function previewImage(event) {
@@ -1200,10 +1211,14 @@
         function generateReceipt() {
             const receiptDiv = document.getElementById('receipt-canvas');
             const now = new Date();
+            const userNickname = localStorage.getItem('inventoryNickname') || 'Admin';
+            
             let receiptHTML = `
                 <div style="text-align:center; border-bottom:3px dashed #2d3436; padding-bottom:20px; margin-bottom:20px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
                     <h2 style="margin:0; font-size:28px; font-weight:800; color:#2d3436;">STOCK REPORT</h2>
-                    <p style="margin:8px 0 0 0; color:#636e72; font-size:16px;">${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
+                    <p style="margin:8px 0 0 0; color:#636e72; font-size:16px; font-weight:bold;">Prepared by: ${userNickname}</p>
+                    <p style="margin:4px 0 0 0; color:#636e72; font-size:14px;">${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
                 </div>`;
 
             inventoryData.forEach(group => {
