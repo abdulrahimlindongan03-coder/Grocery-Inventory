@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RML Partner Hub</title>
+    <link rel="manifest" href="manifest.json">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="app-icon.ico">
@@ -359,7 +360,7 @@
         }
 
         /* ANIMATIONS */
-        @keyframes floatRobot {
+        @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
             100% { transform: translateY(0px); }
@@ -399,7 +400,7 @@
                 margin: auto;
             }
 
-            /* Reverse the grid so Content is on top, Robot is on bottom */
+            /* Reverse the grid so Content is on top,  is on bottom */
             .dashboard-grid {
                 display: flex;
                 flex-direction: column;
