@@ -1,15 +1,20 @@
 {
-  "name": "RML Partner Hub",
-  "short_name": "RML Hub",
-  "start_url": "index.html",
+  "name": "RML Reminder",
+  "short_name": "RML Reminder",
+  "start_url": "reminder.html",
   "display": "standalone",
   "background_color": "#0a0c14",
   "theme_color": "#00f2fe",
   "icons": [
     {
-      "src": "app-icon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
