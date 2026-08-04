@@ -1,7 +1,7 @@
 {
-  "name": "RML Reminder",
-  "short_name": "RML Reminder",
-  "start_url": "reminder.html",
+  "name": "RML Partner Hub",
+  "short_name": "RML Partner",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0a0c14",
   "theme_color": "#00f2fe",
