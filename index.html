@@ -153,6 +153,35 @@
             background: rgba(0, 0, 0, 0.5);
         }
 
+        /* Password container wrapper for toggle button */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 45px !important;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent-cyan);
+        }
+
         /* Remember Me Checkbox */
         .checkbox-group {
             display: flex;
@@ -360,7 +389,7 @@
         }
 
         /* ANIMATIONS */
-        @keyframes float {
+        @keyframes floatRobot {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
             100% { transform: translateY(0px); }
@@ -400,7 +429,7 @@
                 margin: auto;
             }
 
-            /* Reverse the grid so Content is on top,  is on bottom */
+            /* Reverse the grid so Content is on top, robot is on bottom */
             .dashboard-grid {
                 display: flex;
                 flex-direction: column;
@@ -474,8 +503,11 @@
                 <input type="text" id="nickname" placeholder="Choose nickname" required>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+                <label for="password">Password (8+ characters)</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="••••••••" required>
+                    <button type="button" id="toggle-password-btn" class="toggle-password" onclick="togglePasswordVisibility()" title="Show/Hide Password">👁️</button>
+                </div>
             </div>
             
             <div class="checkbox-group" onclick="toggleCheckbox(event)">
@@ -524,7 +556,12 @@
 
     <script>
         // Database & Storage Initialization
-        const usersDB = JSON.parse(localStorage.getItem('app_users')) || {};
+        let usersDB = {};
+        try {
+            usersDB = JSON.parse(localStorage.getItem('app_users')) || {};
+        } catch (e) {
+            usersDB = {};
+        }
         
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
@@ -544,15 +581,24 @@
             }
         }
 
+        // Toggle password visibility function
+        function togglePasswordVisibility() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                document.getElementById('toggle-password-btn').textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                document.getElementById('toggle-password-btn').textContent = '👁️';
+            }
+        }
+
         // --- SESSION MANAGEMENT ON LOAD ---
         function initializeApp() {
             const activeSession = localStorage.getItem('active_user');
             
             if (activeSession && usersDB[activeSession]) {
-                // If a user is already logged in, skip login and show dashboard
                 showDashboardView(usersDB[activeSession].nickname);
             } else {
-                // Otherwise show login view and pre-fill if remembered
                 showLoginView();
                 const rememberedEmail = localStorage.getItem('remembered_email');
                 const rememberedNickname = localStorage.getItem('remembered_nickname');
@@ -574,6 +620,12 @@
             const password = passwordInput.value;
 
             errorMsg.style.display = 'none';
+
+            // Validate password length requirement (at least 8 characters)
+            if (password.length < 8) {
+                showError("Password must be at least 8 characters long.");
+                return;
+            }
 
             // Check if user exists
             if (usersDB[email]) {
@@ -609,7 +661,6 @@
         });
 
         function processLogin(email, nickname) {
-            // Handle the "Remember my details" checkbox
             if (rememberMeCheck.checked) {
                 localStorage.setItem('remembered_email', email);
                 localStorage.setItem('remembered_nickname', nickname);
@@ -618,19 +669,16 @@
                 localStorage.removeItem('remembered_nickname');
             }
 
-            // Set the persistent active session so refreshing doesn't log them out
             localStorage.setItem('active_user', email);
-            
             showDashboardView(nickname);
         }
 
         function signOut() {
-            // Remove the active session, but keep 'remembered' details if they chose to
             localStorage.removeItem('active_user');
+            passwordInput.value = ''; 
+            passwordInput.type = 'password';
+            document.getElementById('toggle-password-btn').textContent = '👁️';
             
-            passwordInput.value = ''; // Always clear password for security
-            
-            // If they didn't want to be remembered, clear the visual form inputs too
             if (!localStorage.getItem('remembered_email')) {
                 emailInput.value = '';
                 nicknameInput.value = '';
