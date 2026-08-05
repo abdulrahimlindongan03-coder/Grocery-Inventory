@@ -448,6 +448,9 @@
                     <label class="checkbox-label">
                         <input type="checkbox" name="categoryCheckbox" value="EXTENDER"> EXTENDER
                     </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="AC1200"> AC1200
+                    </label>
                 </div>
             </div>
 
@@ -753,7 +756,8 @@
                 }
             });
 
-            const defaultCategories = ['RML', 'INDOOR', 'OUTDOOR', 'EXTENDER'];
+            // ADDED AC1200 to the default categories list here
+            const defaultCategories = ['RML', 'INDOOR', 'OUTDOOR', 'EXTENDER', 'AC1200'];
             const allCategories = [...new Set([...defaultCategories, ...Object.keys(categoryCounts)])];
 
             // Render Clickable Summary Badges
