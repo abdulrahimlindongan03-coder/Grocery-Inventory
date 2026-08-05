@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAC ADDRESSES</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* Apply Poppins Bold to EVERYTHING */
+        * {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #2d3748;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Back Button Styling */
+        .header-actions {
+            width: 100%;
+            max-width: 1050px;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            background-color: #718096;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(113, 128, 150, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background-color: #4a5568;
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1050px;
+        }
+
+        /* Form Styling & Desktop Columns */
+        .registration-form {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        label {
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            text-transform: uppercase;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #4299e1;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        /* Checkbox styling */
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #2b6cb0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-register {
+            background-color: #4299e1;
+            box-shadow: 0 4px 14px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn-register:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        /* Delete Management Bar */
+        .delete-owner-card {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .delete-owner-flex {
+            display: flex;
+            gap: 15px;
+        }
+
+        .delete-owner-flex select {
+            flex: 1;
+        }
+
+        .btn-delete-owner {
+            background-color: #e53e3e;
+            box-shadow: 0 4px 14px rgba(229, 62, 62, 0.4);
+            padding: 12px 24px;
+        }
+
+        .btn-delete-owner:hover {
+            background-color: #c53030;
+            transform: translateY(-2px);
+        }
+
+        /* Action Buttons Container */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-save-data {
+            background-color: #805ad5;
+            box-shadow: 0 4px 14px rgba(128, 90, 213, 0.4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn-save-data:hover {
+            background-color: #6b46c1;
+            transform: translateY(-2px);
+        }
+
+        .btn-export-csv {
+            background-color: #d69e2e;
+            box-shadow: 0 4px 14px rgba(214, 158, 46, 0.4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn-export-csv:hover {
+            background-color: #b7791f;
+            transform: translateY(-2px);
+        }
+
+        .btn-import-csv {
+            background-color: #ed8936;
+            box-shadow: 0 4px 14px rgba(237, 137, 54, 0.4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn-import-csv:hover {
+            background-color: #dd6b20;
+            transform: translateY(-2px);
+        }
+
+        .btn-save-png {
+            background-color: #48bb78;
+            box-shadow: 0 4px 14px rgba(72, 187, 120, 0.4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn-save-png:hover {
+            background-color: #38a169;
+            transform: translateY(-2px);
+        }
+
+        /* Category Summary Bar */
+        .category-summary-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .summary-badge {
+            background: #f7fafc;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            border: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .summary-badge span {
+            color: #2b6cb0;
+            margin-left: 4px;
+        }
+
+        /* Table & Capture Area Styling */
+        #capture-area {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+
+        #capture-area h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #edf2f7;
+            font-size: 0.88rem;
+        }
+
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+        }
+
+        .mac-cell {
+            cursor: pointer;
+            color: #2b6cb0;
+            transition: all 0.2s ease;
+            user-select: all;
+        }
+
+        .mac-cell:hover {
+            text-decoration: underline;
+            color: #3182ce;
+        }
+
+        /* Grouping Headers */
+        .category-header {
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 2px;
+            padding: 15px;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: inline-block;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .badge-paid {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-disconnect {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+        }
+
+        .badge-warning {
+            background-color: #fefcbf;
+            color: #744210;
+        }
+
+        .badge-nodate {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-mark-paid {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            background-color: #38a169;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(56, 161, 105, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-mark-paid:hover {
+            background-color: #2f855a;
+        }
+
+        .btn-delete-row {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            background-color: #e53e3e;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(229, 62, 62, 0.3);
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .btn-delete-row:hover {
+            background-color: #c53030;
+        }
+
+        .text-not-due {
+            font-size: 0.75rem;
+            color: #a0aec0;
+        }
+
+        /* MOBILE STYLING */
+        @media (max-width: 768px) {
+            .registration-form {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .delete-owner-flex {
+                flex-direction: column;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            #capture-area {
+                padding: 10px;
+                overflow-x: auto;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .header-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-actions">
+        <a href="index.html" class="btn-back">← Back to Dashboard</a>
+    </div>
+
+    <div class="main-container">
+        <h1>MAC ADDRESSES</h1>
+
+        <div class="registration-form">
+            <div class="input-group full-width">
+                <label>Categories (Select Multiple)</label>
+                <div class="checkbox-container">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="RML"> RML
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="INDOOR"> INDOOR
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="OUTDOOR"> OUTDOOR
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="EXTENDER"> EXTENDER
+                    </label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="macAddress">MAC Address</label>
+                <input type="text" id="macAddress" placeholder="e.g. B8:3A:08:E5:21:C0" maxlength="17">
+            </div>
+
+            <div class="input-group">
+                <label for="ownerName">Owner's Name</label>
+                <input type="text" id="ownerName" placeholder="Enter owner name" list="ownerList">
+                <datalist id="ownerList"></datalist>
+            </div>
+
+            <div class="input-group">
+                <label for="device">Device</label>
+                <input type="text" id="device" placeholder="e.g. Router, Smartphone">
+            </div>
+
+            <div class="input-group">
+                <label for="payment">Payment</label>
+                <input type="text" id="payment" placeholder="Enter payment amount/status">
+            </div>
+
+            <div class="input-group">
+                <label for="dueDay">Due Day of Month (1-31)</label>
+                <input type="number" id="dueDay" min="1" max="31" placeholder="e.g. 15" style="background-color: rgb(247, 250, 252);">
+            </div>
+
+            <div class="input-group full-width">
+                <div class="checkbox-container">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="noDueDate">
+                        No Due Date
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="isInitialPaid">
+                        Mark Initial Bill as Paid
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-register full-width" id="btnRegister">Register Device</button>
+        </div>
+
+        <div class="delete-owner-card">
+            <div class="input-group">
+                <label for="deleteMacSelect">Remove Device By MAC Address</label>
+                <div class="delete-owner-flex">
+                    <select id="deleteMacSelect"><option value="">-- Select MAC Address to Delete --</option></select>
+                    <button class="btn-delete-owner" id="btnDeleteMac">Delete MAC</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="capture-area">
+            <h2>Registered Devices</h2>
+            <div class="category-summary-container" id="categorySummary"></div>
+            <table id="deviceTable">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>MAC Address (Click to Copy)</th>
+                        <th>Device</th>
+                        <th>Payment</th>
+                        <th>Next Due Date</th>
+                        <th>Status</th>
+                        <th class="action-col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <script id="embeddedData" type="application/json">
+            []
+        </script>
+
+        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+        <div class="action-buttons">
+            <button class="btn-save-data" id="btnSaveData" style="background-color: rgb(43, 108, 176);">SAVED!</button>
+            <button class="btn-export-csv" id="btnExportCsv">Export CSV</button>
+            <button class="btn-import-csv" id="btnImportCsv">Import CSV</button>
+            <button class="btn-save-png" id="btnSave">Save as PNG</button>
+        </div>
+
+    </div>
+
+    <script>
+        let recordsData = [];
+        let activeCategoryFilter = null; // New state variable for filtering
+
+        const macInput = document.getElementById('macAddress');
+        const btnRegister = document.getElementById('btnRegister');
+        const tableBody = document.getElementById('tableBody');
+        const categorySummary = document.getElementById('categorySummary');
+        const btnSaveData = document.getElementById('btnSaveData');
+        const btnExportCsv = document.getElementById('btnExportCsv');
+        const btnImportCsv = document.getElementById('btnImportCsv');
+        const csvFileInput = document.getElementById('csvFileInput');
+        const btnSave = document.getElementById('btnSave');
+        const deleteMacSelect = document.getElementById('deleteMacSelect');
+        const btnDeleteMac = document.getElementById('btnDeleteMac');
+        const ownerList = document.getElementById('ownerList');
+        const noDueDateCheckbox = document.getElementById('noDueDate');
+        const dueDayInput = document.getElementById('dueDay');
+        const isInitialPaidCheckbox = document.getElementById('isInitialPaid');
+
+        // --- Toggle No Due Date UI Behavior ---
+        noDueDateCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                dueDayInput.value = '';
+                dueDayInput.disabled = true;
+                dueDayInput.style.backgroundColor = '#edf2f7';
+                isInitialPaidCheckbox.checked = false;
+                isInitialPaidCheckbox.disabled = true;
+            } else {
+                dueDayInput.disabled = false;
+                dueDayInput.style.backgroundColor = '#f7fafc';
+                isInitialPaidCheckbox.disabled = false;
+            }
+        });
+
+        // --- Date Helper Functions ---
+        function parseLocalDate(dateString) {
+            const [y, m, d] = dateString.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function formatLocalDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getCurrentDateString() {
+            return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+        
+        function getDateTimeString() {
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+        }
+
+        // Add 1 month exactly to a given date, respecting the original day of month
+        function addOneMonth(dateString, originalDueDay) {
+            let [y, m, d] = dateString.split('-').map(Number);
+            let nextMonthIndex = m; 
+            let nextYear = y;
+            
+            if (nextMonthIndex > 11) {
+                nextMonthIndex = 0;
+                nextYear++;
+            }
+            
+            let maxDays = new Date(nextYear, nextMonthIndex + 1, 0).getDate();
+            let safeDay = Math.min(originalDueDay, maxDays);
+            
+            let result = new Date(nextYear, nextMonthIndex, safeDay);
+            return formatLocalDate(result);
+        }
+
+        // --- Unique Color Generator per Owner ---
+        function getOwnerStyles(ownerName) {
+            let hash = 0;
+            for (let i = 0; i < ownerName.length; i++) {
+                hash = ownerName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = Math.abs(hash) % 360;
+            return {
+                bg: `hsl(${hue}, 65%, 88%)`,
+                border: `hsl(${hue}, 65%, 72%)`,
+                text: `hsl(${hue}, 80%, 24%)`
+            };
+        }
+
+        // --- 1. Load Saved Data on Startup ---
+        window.addEventListener('DOMContentLoaded', () => {
+            let loaded = false;
+            const embeddedScript = document.getElementById('embeddedData');
+            if (embeddedScript) {
+                try {
+                    const embeddedRecords = JSON.parse(embeddedScript.textContent);
+                    if (Array.isArray(embeddedRecords) && embeddedRecords.length > 0) {
+                        recordsData = embeddedRecords;
+                        loaded = true;
+                    }
+                } catch (e) {
+                    console.error("Error parsing embedded data:", e);
+                }
+            }
+
+            if (!loaded) {
+                const savedRecords = localStorage.getItem('mac_address_records');
+                if (savedRecords) {
+                    recordsData = JSON.parse(savedRecords);
+                }
+            }
+
+            recordsData = recordsData.map(item => {
+                if (item.noDueDate === undefined) {
+                    item.noDueDate = false;
+                }
+                if (!item.nextDueDate && !item.noDueDate) {
+                    let today = new Date();
+                    today.setHours(0,0,0,0);
+                    let originalDueDay = parseInt(item.dueDay, 10) || 1;
+                    let y = today.getFullYear();
+                    let m = today.getMonth();
+                    let maxD = new Date(y, m + 1, 0).getDate();
+                    let safeD = Math.min(originalDueDay, maxD);
+                    
+                    let nextD = new Date(y, m, safeD);
+                    if (today > nextD) { 
+                        m++;
+                        if (m > 11) { m = 0; y++; }
+                        maxD = new Date(y, m + 1, 0).getDate();
+                        safeD = Math.min(originalDueDay, maxD);
+                        nextD = new Date(y, m, safeD);
+                    }
+                    item.originalDueDay = originalDueDay;
+                    item.nextDueDate = formatLocalDate(nextD);
+                }
+                if (item.category) item.category = item.category.toUpperCase();
+                if (item.owner) item.owner = item.owner.toUpperCase();
+                if (item.device) item.device = item.device.toUpperCase();
+                return item;
+            });
+            renderTable();
+        });
+
+        // --- 2. MAC Address Auto-formatting ---
+        macInput.addEventListener('input', function (e) {
+            let val = e.target.value.replace(/[^a-fA-F0-9]/g, '').toUpperCase();
+            let formatted = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 2 === 0) formatted += ':';
+                formatted += val[i];
+            }
+            e.target.value = formatted.substring(0, 17);
+        });
+
+        // --- Copy MAC Address Function ---
+        window.copyMac = function(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                element.innerText = 'COPIED!';
+                element.style.color = '#38a169';
+                setTimeout(() => {
+                    element.innerText = text;
+                    element.style.color = '';
+                }, 1200);
+            }).catch(() => {
+                alert('Copied: ' + text);
+            });
+        };
+
+        // --- Populate Owner Datalist and Delete MAC Dropdown ---
+        function updateChoices() {
+            const currentSelectedMac = deleteMacSelect.value;
+            deleteMacSelect.innerHTML = '<option value="">-- Select MAC Address to Delete --</option>';
+            ownerList.innerHTML = '';
+
+            const owners = [...new Set(recordsData.map(r => r.owner).filter(Boolean))];
+            owners.forEach(owner => {
+                const dataOpt = document.createElement('option');
+                dataOpt.value = owner;
+                ownerList.appendChild(dataOpt);
+            });
+
+            const macMap = new Map();
+            recordsData.forEach(r => {
+                if (r.mac && !macMap.has(r.mac)) {
+                    macMap.set(r.mac, `${r.mac} (${r.owner || 'UNKNOWN'} - ${r.device || 'DEVICE'})`);
+                }
+            });
+
+            macMap.forEach((text, mac) => {
+                const opt = document.createElement('option');
+                opt.value = mac;
+                opt.textContent = text;
+                deleteMacSelect.appendChild(opt);
+            });
+
+            if (macMap.has(currentSelectedMac)) deleteMacSelect.value = currentSelectedMac;
+        }
+
+        // --- Render Table & Summary ---
+        function renderTable() {
+            tableBody.innerHTML = '';
+            categorySummary.innerHTML = '';
+            
+            let today = new Date();
+            today.setHours(0,0,0,0);
+
+            // Calculate Counts based on ALL data
+            const categoryCounts = {};
+            recordsData.forEach(r => {
+                if (r.category) {
+                    categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
+                }
+            });
+
+            const defaultCategories = ['RML', 'INDOOR', 'OUTDOOR', 'EXTENDER'];
+            const allCategories = [...new Set([...defaultCategories, ...Object.keys(categoryCounts)])];
+
+            // Render Clickable Summary Badges
+            allCategories.forEach(cat => {
+                const count = categoryCounts[cat] || 0;
+                const badge = document.createElement('div');
+                badge.className = 'summary-badge';
+                badge.style.cursor = 'pointer'; // Indicates it's clickable
+                
+                // Highlight visually if it is currently filtering
+                if (activeCategoryFilter === cat) {
+                    badge.style.border = '2px solid #2b6cb0';
+                    badge.style.backgroundColor = '#e2e8f0';
+                }
+
+                badge.innerHTML = `${cat}: <span>${count} Connected</span>`;
+                
+                // Click handler for filtering
+                badge.onclick = () => {
+                    // Toggle off if already selected, otherwise set to new category
+                    activeCategoryFilter = (activeCategoryFilter === cat) ? null : cat;
+                    renderTable();
+                };
+
+                categorySummary.appendChild(badge);
+            });
+
+            // Filter data for the table rendering
+            const recordsToDisplay = activeCategoryFilter 
+                ? recordsData.filter(r => r.category === activeCategoryFilter)
+                : recordsData;
+
+            const owners = [...new Set(recordsToDisplay.map(r => r.owner).filter(Boolean))].sort();
+
+            owners.forEach(owner => {
+                const ownerRecords = recordsToDisplay.filter(r => r.owner === owner);
+                
+                if (ownerRecords.length > 0) {
+                    const styles = getOwnerStyles(owner);
+                    const headerTr = document.createElement('tr');
+                    headerTr.innerHTML = `<td colspan="7" class="category-header" style="background-color: ${styles.bg}; color: ${styles.text}; border-bottom: 3px solid ${styles.border};">OWNER: ${owner}</td>`;
+                    tableBody.appendChild(headerTr);
+
+                    ownerRecords.forEach(item => {
+                        const mainIndex = recordsData.indexOf(item); // Keep original array index for edit/delete functions
+
+                        let badgeClass = 'badge-paid';
+                        let statusLabel = 'PAID';
+                        let actionHtml = '';
+                        let dueDateDisplay = item.nextDueDate;
+                        let deleteBtn = `<button class="btn-delete-row" onclick="deleteRecord(${mainIndex})">DELETE</button>`;
+
+                        if (item.noDueDate) {
+                            badgeClass = 'badge-nodate';
+                            statusLabel = 'NO DUE DATE';
+                            dueDateDisplay = 'N/A';
+                            actionHtml = `${deleteBtn}`;
+                        } else {
+                            let dueDateObj = parseLocalDate(item.nextDueDate);
+                            let diffTime = dueDateObj.getTime() - today.getTime();
+                            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays < 0) {
+                                badgeClass = 'badge-disconnect';
+                                statusLabel = 'TO BE DISCONNECTED';
+                                actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
+                            } else if (diffDays === 0) {
+                                badgeClass = 'badge-warning';
+                                statusLabel = 'DUE TODAY';
+                                actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
+                            } else if (diffDays === 1) {
+                                badgeClass = 'badge-warning';
+                                statusLabel = 'DUE TOMORROW';
+                                actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
+                            } else {
+                                actionHtml = `<span class="text-not-due">NOT DUE YET</span>${deleteBtn}`;
+                            }
+                        }
+
+                        const tr = document.createElement('tr');
+
+                        tr.innerHTML = `
+                            <td><span class="badge badge-nodate" style="background:#e2e8f0; color:#2d3748;">${item.category}</span></td>
+                            <td class="mac-cell" title="Click to copy" onclick="copyMac('${item.mac}', this)">${item.mac}</td>
+                            <td>${item.device}</td>
+                            <td>${item.payment}</td>
+                            <td>${dueDateDisplay}</td>
+                            <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+                            <td class="action-col">${actionHtml}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                }
+            });
+
+            updateChoices();
+        }
+
+        // --- Mark as Paid ---
+        window.markPaid = function(index) {
+            const item = recordsData[index];
+            if (!item.noDueDate) {
+                item.nextDueDate = addOneMonth(item.nextDueDate, item.originalDueDay);
+                renderTable();
+            }
+        };
+
+        // --- Delete Row ---
+        window.deleteRecord = function(index) {
+            const item = recordsData[index];
+            if (confirm(`Are you sure you want to delete the device "${item.device}" (${item.mac}) owned by "${item.owner}"?`)) {
+                recordsData.splice(index, 1);
+                renderTable();
+            }
+        };
+
+        // --- Delete MAC ---
+        btnDeleteMac.addEventListener('click', () => {
+            const selectedMac = deleteMacSelect.value;
+            if (!selectedMac) {
+                alert("Please select a MAC address to delete.");
+                return;
+            }
+            if (confirm(`Are you sure you want to delete all entries for MAC address: "${selectedMac}"?`)) {
+                recordsData = recordsData.filter(item => item.mac !== selectedMac);
+                renderTable();
+            }
+        });
+
+        // --- Register Device ---
+        btnRegister.addEventListener('click', () => {
+            const selectedCategories = Array.from(document.querySelectorAll('input[name="categoryCheckbox"]:checked')).map(cb => cb.value);
+            const mac = document.getElementById('macAddress').value;
+            const owner = document.getElementById('ownerName').value.trim().toUpperCase();
+            const device = document.getElementById('device').value.trim().toUpperCase();
+            const payment = document.getElementById('payment').value;
+            const noDueDate = noDueDateCheckbox.checked;
+            const dueDayVal = dueDayInput.value;
+            const isInitialPaid = isInitialPaidCheckbox.checked;
+
+            if (selectedCategories.length === 0 || !mac || !owner || !device || (!noDueDate && !dueDayVal)) {
+                alert("Please select at least one Category, and fill in the MAC Address, Owner, Device, and Due Day fields (or select No Due Date).");
+                return;
+            }
+
+            let originalDueDay = null;
+            let nextDueDateStr = 'N/A';
+
+            if (!noDueDate) {
+                originalDueDay = parseInt(dueDayVal, 10);
+                if (originalDueDay < 1 || originalDueDay > 31) {
+                    alert("Please enter a valid day between 1 and 31.");
+                    return;
+                }
+
+                let today = new Date();
+                today.setHours(0,0,0,0);
+                let y = today.getFullYear();
+                let m = today.getMonth();
+                
+                let maxD = new Date(y, m + 1, 0).getDate();
+                let safeD = Math.min(originalDueDay, maxD);
+                let baseDate = new Date(y, m, safeD);
+
+                if (today > baseDate) {
+                    m++;
+                    if (m > 11) { m = 0; y++; }
+                    maxD = new Date(y, m + 1, 0).getDate();
+                    safeD = Math.min(originalDueDay, maxD);
+                    baseDate = new Date(y, m, safeD);
+                }
+
+                nextDueDateStr = formatLocalDate(baseDate);
+
+                if (isInitialPaid) {
+                    nextDueDateStr = addOneMonth(nextDueDateStr, originalDueDay);
+                }
+            }
+
+            selectedCategories.forEach(category => {
+                recordsData.push({
+                    category,
+                    mac,
+                    owner,
+                    device,
+                    payment,
+                    noDueDate,
+                    originalDueDay,
+                    nextDueDate: nextDueDateStr
+                });
+            });
+
+            renderTable();
+
+            document.querySelectorAll('input[name="categoryCheckbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('macAddress').value = '';
+            document.getElementById('ownerName').value = '';
+            document.getElementById('device').value = '';
+            document.getElementById('payment').value = '';
+            dueDayInput.value = '';
+            noDueDateCheckbox.checked = false;
+            dueDayInput.disabled = false;
+            dueDayInput.style.backgroundColor = '#f7fafc';
+            isInitialPaidCheckbox.checked = false;
+            isInitialPaidCheckbox.disabled = false;
+        });
+
+        // --- Save Changes to LocalStorage ---
+        btnSaveData.addEventListener('click', () => {
+            localStorage.setItem('mac_address_records', JSON.stringify(recordsData));
+
+            btnSaveData.textContent = 'SAVED!';
+            btnSaveData.style.backgroundColor = '#2b6cb0';
+            setTimeout(() => {
+                btnSaveData.textContent = 'SAVE CHANGES';
+                btnSaveData.style.backgroundColor = '#805ad5';
+            }, 2000);
+        });
+
+        // --- Export CSV ---
+        btnExportCsv.addEventListener('click', () => {
+            if (recordsData.length === 0) {
+                alert("No records available to export!");
+                return;
+            }
+
+            let csvContent = "Category,MAC Address,Owner,Device,Payment,No Due Date,Original Due Day,Next Due Date\r\n";
+            
+            recordsData.forEach(item => {
+                let row = [
+                    `"${(item.category || '').replace(/"/g, '""')}"`,
+                    `"${(item.mac || '').replace(/"/g, '""')}"`,
+                    `"${(item.owner || '').replace(/"/g, '""')}"`,
+                    `"${(item.device || '').replace(/"/g, '""')}"`,
+                    `"${(item.payment || '').replace(/"/g, '""')}"`,
+                    `"${item.noDueDate ? 'True' : 'False'}"`,
+                    `"${item.originalDueDay !== null && item.originalDueDay !== undefined ? item.originalDueDay : ''}"`,
+                    `"${(item.nextDueDate || '').replace(/"/g, '""')}"`
+                ];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            // Format filename using RML_MAC-(date and time)
+            const dateTimeStr = getDateTimeString();
+            link.href = URL.createObjectURL(blob);
+            link.download = `RML_MAC-${dateTimeStr}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+
+            btnExportCsv.textContent = 'EXPORTED!';
+            btnExportCsv.style.backgroundColor = '#975a16';
+            setTimeout(() => {
+                btnExportCsv.textContent = 'Export CSV';
+                btnExportCsv.style.backgroundColor = '#d69e2e';
+            }, 2000);
+        });
+
+        // --- Import CSV ---
+        btnImportCsv.addEventListener('click', () => {
+            csvFileInput.click();
+        });
+
+        csvFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    parseCSV(event.target.result);
+                } catch (err) {
+                    alert("Error parsing CSV file: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            this.value = '';
+        });
+
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/);
+            if (lines.length < 2) {
+                alert("CSV file is empty or invalid.");
+                return;
+            }
+
+            function parseCSVLine(line) {
+                const result = [];
+                let startValue = 0;
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const c = line[i];
+                    if (c === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (c === ',' && !inQuotes) {
+                        let val = line.substring(startValue, i).trim();
+                        if (val.startsWith('"') && val.endsWith('"')) {
+                            val = val.substring(1, val.length - 1).replace(/""/g, '"');
+                        }
+                        result.push(val);
+                        startValue = i + 1;
+                    }
+                }
+                let val = line.substring(startValue).trim();
+                if (val.startsWith('"') && val.endsWith('"')) {
+                    val = val.substring(1, val.length - 1).replace(/""/g, '"');
+                }
+                result.push(val);
+                return result;
+            }
+
+            const newRecords = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cols = parseCSVLine(line);
+                if (cols.length >= 5) {
+                    const category = (cols[0] || 'RML').toUpperCase();
+                    const mac = cols[1] || '';
+                    const owner = (cols[2] || '').toUpperCase();
+                    const device = (cols[3] || '').toUpperCase();
+                    const payment = cols[4] || '';
+                    const noDueDate = cols[5] ? cols[5].toLowerCase() === 'true' : false;
+                    const originalDueDay = cols[6] && cols[6] !== '' && cols[6] !== 'null' ? parseInt(cols[6], 10) : null;
+                    const nextDueDate = cols[7] || 'N/A';
+
+                    if (mac && owner) {
+                        newRecords.push({
+                            category,
+                            mac,
+                            owner,
+                            device,
+                            payment,
+                            noDueDate,
+                            originalDueDay,
+                            nextDueDate
+                        });
+                    }
+                }
+            }
+
+            if (newRecords.length > 0) {
+                if (confirm(`Successfully parsed ${newRecords.length} records. Click OK to Replace existing records, or Cancel to Append them.`)) {
+                    recordsData = newRecords;
+                } else {
+                    recordsData = recordsData.concat(newRecords);
+                }
+                renderTable();
+                alert("CSV imported successfully!");
+            } else {
+                alert("No valid records found in the CSV file.");
+            }
+        }
+
+        // --- Save as PNG ---
+        btnSave.addEventListener('click', () => {
+            const captureArea = document.getElementById('capture-area');
+            const actionCols = captureArea.querySelectorAll('.action-col');
+            
+            actionCols.forEach(col => col.style.display = 'none');
+
+            html2canvas(captureArea, {
+                scale: 2,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const dateStr = getCurrentDateString();
+                
+                link.download = `MAC ADDRESS_${dateStr}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                actionCols.forEach(col => col.style.display = '');
+            });
+        });
+    </script>
+</body></html>
