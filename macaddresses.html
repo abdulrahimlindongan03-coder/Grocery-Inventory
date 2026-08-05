@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAC ADDRESSES</title>
+    <title>RML_MAC ADDRESSES</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
@@ -63,6 +64,62 @@
         .main-container {
             width: 100%;
             max-width: 1050px;
+        }
+
+        /* Top Action Buttons Container */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            min-width: 0; /* Allows buttons to shrink neatly in one row */
+            padding: 12px 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .btn-save-data {
+            background-color: #805ad5;
+            box-shadow: 0 4px 14px rgba(128, 90, 213, 0.4);
+        }
+
+        .btn-save-data:hover {
+            background-color: #6b46c1;
+            transform: translateY(-2px);
+        }
+
+        .btn-export-csv {
+            background-color: #d69e2e;
+            box-shadow: 0 4px 14px rgba(214, 158, 46, 0.4);
+        }
+
+        .btn-export-csv:hover {
+            background-color: #b7791f;
+            transform: translateY(-2px);
+        }
+
+        .btn-import-csv {
+            background-color: #ed8936;
+            box-shadow: 0 4px 14px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-import-csv:hover {
+            background-color: #dd6b20;
+            transform: translateY(-2px);
+        }
+
+        .btn-save-png {
+            background-color: #48bb78;
+            box-shadow: 0 4px 14px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-save-png:hover {
+            background-color: #38a169;
+            transform: translateY(-2px);
         }
 
         /* Form Styling & Desktop Columns */
@@ -182,62 +239,6 @@
 
         .btn-delete-owner:hover {
             background-color: #c53030;
-            transform: translateY(-2px);
-        }
-
-        /* Action Buttons Container */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn-save-data {
-            background-color: #805ad5;
-            box-shadow: 0 4px 14px rgba(128, 90, 213, 0.4);
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .btn-save-data:hover {
-            background-color: #6b46c1;
-            transform: translateY(-2px);
-        }
-
-        .btn-export-csv {
-            background-color: #d69e2e;
-            box-shadow: 0 4px 14px rgba(214, 158, 46, 0.4);
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .btn-export-csv:hover {
-            background-color: #b7791f;
-            transform: translateY(-2px);
-        }
-
-        .btn-import-csv {
-            background-color: #ed8936;
-            box-shadow: 0 4px 14px rgba(237, 137, 54, 0.4);
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .btn-import-csv:hover {
-            background-color: #dd6b20;
-            transform: translateY(-2px);
-        }
-
-        .btn-save-png {
-            background-color: #48bb78;
-            box-shadow: 0 4px 14px rgba(72, 187, 120, 0.4);
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .btn-save-png:hover {
-            background-color: #38a169;
             transform: translateY(-2px);
         }
 
@@ -393,40 +394,55 @@
 
         /* MOBILE STYLING */
         @media (max-width: 768px) {
+            /* Force Action Buttons into 1 row on Mobile */
+            .action-buttons {
+                flex-direction: row;
+                gap: 5px;
+            }
+
+            .action-buttons button {
+                font-size: 0.65rem;
+                padding: 10px 2px;
+                letter-spacing: 0px;
+            }
+
             .registration-form {
                 grid-template-columns: 1fr;
                 padding: 15px;
             }
+
             .full-width {
                 grid-column: span 1;
             }
+
             .delete-owner-flex {
                 flex-direction: column;
             }
-            .action-buttons {
-                flex-direction: column;
-            }
+
             #capture-area {
                 padding: 10px;
                 overflow-x: auto;
             }
+
             th, td {
                 padding: 8px;
                 font-size: 0.8rem;
             }
+
             h1 {
                 font-size: 1.8rem;
             }
+
             .header-actions {
                 justify-content: center;
             }
 
-            /* Force Category Summary Bar to smaller text and layout */
             .category-summary-container {
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
             }
+
             .summary-badge {
                 flex: 1 1 30%;
                 max-width: 32%;
@@ -445,6 +461,14 @@
 
     <div class="main-container">
         <h1>MAC ADDRESSES</h1>
+
+        <!-- Action Buttons Moved to Top (Single Row Layout) -->
+        <div class="action-buttons">
+            <button class="btn-save-data" id="btnSaveData" style="background-color: rgb(43, 108, 176);">SAVED!</button>
+            <button class="btn-export-csv" id="btnExportCsv">Export CSV</button>
+            <button class="btn-import-csv" id="btnImportCsv">Import CSV</button>
+            <button class="btn-save-png" id="btnSave">Save as PNG</button>
+        </div>
 
         <div class="registration-form">
             <div class="input-group full-width">
@@ -548,13 +572,6 @@
 
         <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
 
-        <div class="action-buttons">
-            <button class="btn-save-data" id="btnSaveData" style="background-color: rgb(43, 108, 176);">SAVED!</button>
-            <button class="btn-export-csv" id="btnExportCsv">Export CSV</button>
-            <button class="btn-import-csv" id="btnImportCsv">Import CSV</button>
-            <button class="btn-save-png" id="btnSave">Save as PNG</button>
-        </div>
-
     </div>
 
     <script>
@@ -611,8 +628,21 @@
         
         function getDateTimeString() {
             const d = new Date();
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            const month = monthNames[d.getMonth()];
+            const day = String(d.getDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert 24-hour time to 12-hour time
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            
+            return `${month}. ${day}, ${year}_${hours}:${minutes}${ampm}`;
         }
 
         // Add 1 month exactly to a given date, respecting the original day of month
@@ -781,9 +811,8 @@
                 const count = categoryCounts[cat] || 0;
                 const badge = document.createElement('div');
                 badge.className = 'summary-badge';
-                badge.style.cursor = 'pointer'; // Indicates it's clickable
+                badge.style.cursor = 'pointer';
                 
-                // Highlight visually if it is currently filtering
                 if (activeCategoryFilter === cat) {
                     badge.style.border = '2px solid #2b6cb0';
                     badge.style.backgroundColor = '#e2e8f0';
@@ -791,9 +820,7 @@
 
                 badge.innerHTML = `${cat}: <span>${count} Connected</span>`;
                 
-                // Click handler for filtering
                 badge.onclick = () => {
-                    // Toggle off if already selected, otherwise set to new category
                     activeCategoryFilter = (activeCategoryFilter === cat) ? null : cat;
                     renderTable();
                 };
@@ -801,7 +828,7 @@
                 categorySummary.appendChild(badge);
             });
 
-            // Filter data for the table rendering
+            // Filter data for table rendering
             const recordsToDisplay = activeCategoryFilter 
                 ? recordsData.filter(r => r.category === activeCategoryFilter)
                 : recordsData;
@@ -818,7 +845,7 @@
                     tableBody.appendChild(headerTr);
 
                     ownerRecords.forEach(item => {
-                        const mainIndex = recordsData.indexOf(item); // Keep original array index for edit/delete functions
+                        const mainIndex = recordsData.indexOf(item);
 
                         let badgeClass = 'badge-paid';
                         let statusLabel = 'PAID';
@@ -1019,10 +1046,9 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             
-            // Format filename using RML_MAC-(date and time)
             const dateTimeStr = getDateTimeString();
             link.href = URL.createObjectURL(blob);
-            link.download = `RML_MAC-${dateTimeStr}.csv`;
+            link.download = `RML_MAC ${dateTimeStr}.csv`;
             link.click();
             URL.revokeObjectURL(link.href);
 
@@ -1156,4 +1182,5 @@
             });
         });
     </script>
-</body></html>
+</body>
+</html>

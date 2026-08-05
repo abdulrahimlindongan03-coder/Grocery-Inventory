@@ -276,7 +276,6 @@
                     <p id="welcome-msg" style="margin:0;">Dashboard & Stock Tracking Active.</p>
                 </div>
             </div>
-            <!-- ALL CONTROL BUTTONS MOVED TO TOP HEADER -->
             <div class="header-actions">
                 <button class="btn btn-primary" onclick="openModal()">+ Add Product</button>
                 <button class="btn btn-info" onclick="openAddBatchModal()">+ Add Stock</button>
@@ -457,7 +456,7 @@
         const EMAILJS_SERVICE_ID = "service_0jkjrh8";    
         const EMAILJS_TEMPLATE_ID = "template_icemnt4"; 
 
-        if (EMAILJS_PUBLIC_KEY !== "s9JVqJECJ6GtFy_70") {
+        if (EMAILJS_PUBLIC_KEY) {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
@@ -467,6 +466,24 @@
         let html5QrcodeScanner = null;
         let currentScannerMode = ""; 
         let torchOn = false;
+
+        function getFormattedFileName(prefix, extension) {
+            const d = new Date();
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            const month = months[d.getMonth()];
+            const day = String(d.getDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            
+            return `${prefix} ${month}. ${day}, ${year}_${hours}:${minutes}${ampm}.${extension}`;
+        }
 
         function toTitleCase(str) {
             if (!str) return "";
@@ -541,23 +558,18 @@
                 localStorage.setItem('inventoryNickname', nickname);
                 localStorage.setItem('inventoryEmail', email);
 
-                if (EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") {
-                    setTimeout(() => {
-                        checkLogin();
-                        showToast(`Welcome, ${nickname}! 🎉`);
-                    }, 500);
-                    return;
-                }
-
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name: nickname, to_email: email, message: "Welcome to Smart Inventory! Automatic daily expiry alerts are now active." })
-                    .then(function() {
-                        checkLogin();
-                        showToast(`Welcome, ${nickname}! 🎉`);
-                    }, function() {
-                        alert(`❌ Failed to send email via EmailJS.`);
-                        signupBtn.innerText = "Enter Dashboard 🚀";
-                        signupBtn.disabled = false;
-                    });
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { 
+                    to_name: nickname, 
+                    to_email: email, 
+                    message: "Welcome to Smart Inventory! Automatic daily expiry alerts are now active." 
+                }).then(function() {
+                    checkLogin();
+                    showToast(`Welcome, ${nickname}! 🎉`);
+                }, function(err) {
+                    console.error("EmailJS Error:", err);
+                    checkLogin();
+                    showToast(`Welcome, ${nickname}! 🎉`);
+                });
             } else {
                 alert("Please enter a valid nickname and Gmail address.");
             }
@@ -566,7 +578,7 @@
         function checkAndSendAutomaticEmail() {
             const email = localStorage.getItem('inventoryEmail');
             const nickname = localStorage.getItem('inventoryNickname');
-            if (!email || EMAILJS_PUBLIC_KEY === "s9JVqJECJ6GtFy_70") return;
+            if (!email) return;
 
             const todayStr = new Date().toDateString();
             const lastSent = localStorage.getItem('lastAutoExpiryEmailDate');
@@ -1158,9 +1170,10 @@
                 group.items.forEach(item => {
                     let totalQty = item.batches.reduce((sum, batch) => sum + batch.qty, 0);
                     let batchStrings = item.batches.map(b => b.exp === 'No Expiry' ? `${b.qty}pcs (No Expiry)` : `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
+                    const crossOriginAttr = item.img.startsWith('data:') ? '' : 'crossorigin="anonymous"';
                     receiptHTML += `
                         <div style="display:flex; align-items:center; gap:15px; margin-top:12px;">
-                            <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" crossorigin="anonymous">
+                            <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" ${crossOriginAttr}>
                             <div style="font-size:16px; font-weight:600;">
                                 ${item.name} <span style="font-size:14px; color:#636e72;">(Total: ${totalQty})</span>
                                 <div style="font-size:13px; color:#636e72; font-weight:500;">${batchStrings}</div>
@@ -1175,7 +1188,7 @@
             setTimeout(() => {
                 html2canvas(receiptDiv, { backgroundColor: '#ffffff', scale: 2, useCORS: true }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = `Stock_Report_${now.getTime()}.png`;
+                    link.download = getFormattedFileName("RML_Inventory_Report", "png");
                     link.href = canvas.toDataURL("image/png");
                     link.click();
                     receiptDiv.innerHTML = '';
@@ -1211,11 +1224,7 @@
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-
-            const now = new Date();
-            const dateStr = now.toLocaleDateString().replace(/\//g, '-'); 
-            const timeStr = now.toLocaleTimeString().replace(/:/g, '-').replace(/ /g, ''); 
-            link.setAttribute("download", `GROCERY INVENTORY- (${dateStr} ${timeStr}).csv`);
+            link.setAttribute("download", getFormattedFileName("RML_Inventory", "csv"));
             
             link.style.visibility = 'hidden';
             document.body.appendChild(link);

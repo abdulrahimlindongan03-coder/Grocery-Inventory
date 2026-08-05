@@ -724,18 +724,24 @@
         // --- EXPORT AND IMPORT FEATURES ---
 
         function getFormattedFileName(extension) {
-            const d = new Date();
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const month = months[d.getMonth()];
-            const day = d.getDate();
-            const year = d.getFullYear();
-            let hours = d.getHours();
-            const minutes = d.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            return `RML_Reminder - (${month} ${day} ${year} ${hours}-${minutes} ${ampm}).${extension}`;
-        }
+    const d = new Date();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    const month = months[d.getMonth()];
+    const day = String(d.getDate()).padStart(2, '0');
+    const year = d.getFullYear();
+    
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; 
+    
+    // Outputs: RML_Reminder Aug. 05, 2026_7:28PM.ext
+    return `RML_Reminder ${month}. ${day}, ${year}_${hours}:${minutes}${ampm}.${extension}`;
+}
 
         function exportToCSV() {
             let csvContent = "Type,ID,Title,Amount,DateTime,Description,Completed\n";
