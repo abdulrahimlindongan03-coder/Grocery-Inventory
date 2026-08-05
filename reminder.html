@@ -222,6 +222,32 @@
             flex: 1;
         }
 
+        /* Added Loader CSS */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            gap: 15px;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 242, 254, 0.1);
+            border-top: 4px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .items-list {
             display: flex;
             flex-direction: column;
@@ -476,15 +502,21 @@
     <div id="toast">Saved Successfully!</div>
 
     <script>
-        // Data Structure Storage initialization
+        // Loading State Initialization
+        let isInitialLoad = true;
         let remindersData = JSON.parse(localStorage.getItem('rml_reminders_v2')) || { payments: [], activities: [] };
+
+        // 5-Second Delay Before Showing Items
+        setTimeout(() => {
+            isInitialLoad = false;
+            renderReminders();
+        }, 5000);
 
         function saveData() {
             localStorage.setItem('rml_reminders_v2', JSON.stringify(remindersData));
             renderReminders();
         }
 
-        // Feature: Auto-Delete and Time Checks
         function checkAutoDelete() {
             const now = new Date().getTime();
             const fiveHoursMs = 5 * 60 * 60 * 1000;
@@ -505,16 +537,15 @@
             });
 
             if (dataChanged) {
-                saveData(); // Resaves data and auto-refreshes screen
+                saveData();
                 showToast("Tasks 5+ hours old were auto-deleted!");
             }
         }
 
-        // Run updates periodically (every 10 seconds)
         checkAutoDelete();
         setInterval(() => {
             checkAutoDelete();
-            renderReminders();
+            if (!isInitialLoad) renderReminders();
         }, 10000);
 
         function addReminder(event, type) {
@@ -577,18 +608,19 @@
             return dt.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
         }
 
-        // Calculates the display badge text based on exact/overlapse rules
+        // Updated Badge function to show Future time left as well as Overlapsed
         function getStatusBadge(datetime) {
             const now = new Date().getTime();
             const itemTime = new Date(datetime).getTime();
             const timeDiff = now - itemTime;
 
             if (timeDiff >= 0) {
+                // Overlapsed Logic (Past)
                 const hours = Math.floor(timeDiff / (1000 * 60 * 60));
                 const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
                 if (hours >= 5) {
-                    return ""; // This state is caught and deleted by the cleanup function
+                    return ""; 
                 } else if (hours > 0) {
                     return `<span class="badge-overlapse" style="background: rgba(255, 165, 2, 0.2); color: var(--warning); border: 1px solid var(--warning);">Overlapsed: ${hours} hour(s) ago</span>`;
                 } else if (minutes > 0) {
@@ -596,12 +628,41 @@
                 } else {
                     return `<span class="badge-overlapse" style="background: rgba(46, 213, 115, 0.2); color: var(--success); border: 1px solid var(--success);">Exact date is reached</span>`;
                 }
+            } else {
+                // Time Left Logic (Future)
+                const futureDiff = Math.abs(timeDiff);
+                const daysLeft = Math.floor(futureDiff / (1000 * 60 * 60 * 24));
+                const hoursLeft = Math.floor((futureDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minsLeft = Math.floor((futureDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+                let timeLeftStr = "";
+                if (daysLeft > 0) timeLeftStr += `${daysLeft}d `;
+                if (hoursLeft > 0) timeLeftStr += `${hoursLeft}h `;
+                if (daysLeft === 0 && minsLeft > 0) timeLeftStr += `${minsLeft}m `;
+
+                if (timeLeftStr.trim() === "") timeLeftStr = "< 1m ";
+
+                return `<span class="badge-overlapse" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">⏳ ${timeLeftStr.trim()} left</span>`;
             }
-            return '';
         }
 
         function renderReminders() {
             const payContainer = document.getElementById('payments-list');
+            const actContainer = document.getElementById('activities-list');
+
+            // Handling the Loading State
+            if (isInitialLoad) {
+                const loaderHtml = `
+                    <div class="loading-container">
+                        <div class="loader"></div>
+                        <span>Syncing pending tasks...</span>
+                    </div>`;
+                payContainer.innerHTML = loaderHtml;
+                actContainer.innerHTML = loaderHtml;
+                return; // Stop rendering lists until load is complete
+            }
+
+            // Regular Render Logic
             payContainer.innerHTML = '';
             if (remindersData.payments.length === 0) {
                 payContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">No pending payment reminders.</div>';
@@ -625,7 +686,6 @@
                 });
             }
 
-            const actContainer = document.getElementById('activities-list');
             actContainer.innerHTML = '';
             if (remindersData.activities.length === 0) {
                 actContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">No pending activity reminders.</div>';
@@ -785,8 +845,14 @@
                 if (hours > 0) return `<span style="color: red;">OVERLAPSED: ${hours} HR(S) AGO</span>`;
                 if (minutes > 0) return `<span style="color: red;">OVERLAPSED: ${minutes} MIN(S) AGO</span>`;
                 return `<span style="color: green;">EXACT DATE REACHED</span>`;
+            } else {
+                const futureDiff = Math.abs(timeDiff);
+                const daysLeft = Math.floor(futureDiff / (1000 * 60 * 60 * 24));
+                const hoursLeft = Math.floor((futureDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                if(daysLeft > 0) return `<span style="color: blue;">DUE IN ${daysLeft} DAY(S)</span>`;
+                if(hoursLeft > 0) return `<span style="color: blue;">DUE IN ${hoursLeft} HR(S)</span>`;
+                return `<span style="color: blue;">DUE IN < 1 HR</span>`;
             }
-            return '<span style="color: orange;">PENDING</span>';
         }
 
         function prepareTemplateData() {
@@ -864,6 +930,9 @@
                 });
             }, 500);
         }
+        
+        // Initial manual trigger for the loader right away. 
+        renderReminders();
     </script>
 </body>
 </html>
