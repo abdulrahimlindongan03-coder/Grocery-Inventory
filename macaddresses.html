@@ -420,6 +420,20 @@
             .header-actions {
                 justify-content: center;
             }
+
+            /* Force Category Summary Bar to smaller text and layout */
+            .category-summary-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .summary-badge {
+                flex: 1 1 30%;
+                max-width: 32%;
+                font-size: 0.72rem;
+                padding: 8px 4px;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -450,6 +464,9 @@
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="categoryCheckbox" value="AC1200"> AC1200
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="categoryCheckbox" value="ROUTER"> ROUTER
                     </label>
                 </div>
             </div>
@@ -756,8 +773,7 @@
                 }
             });
 
-            // ADDED AC1200 to the default categories list here
-            const defaultCategories = ['RML', 'INDOOR', 'OUTDOOR', 'EXTENDER', 'AC1200'];
+            const defaultCategories = ['RML', 'INDOOR', 'OUTDOOR', 'EXTENDER', 'AC1200', 'ROUTER'];
             const allCategories = [...new Set([...defaultCategories, ...Object.keys(categoryCounts)])];
 
             // Render Clickable Summary Badges
