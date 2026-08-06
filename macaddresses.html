@@ -213,13 +213,16 @@
             transform: translateY(-2px);
         }
 
-        /* Delete Management Bar */
+        /* Management Card (Search & Delete) */
         .delete-owner-card {
             background: #ffffff;
             padding: 20px 25px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .delete-owner-flex {
@@ -537,7 +540,13 @@
             <button class="btn-register full-width" id="btnRegister">Register Device</button>
         </div>
 
+        <!-- Integrated Search & Delete Card -->
         <div class="delete-owner-card">
+            <div class="input-group">
+                <label for="searchInput">Search Records</label>
+                <input type="text" id="searchInput" placeholder="Search by Owner Name or MAC Address...">
+            </div>
+
             <div class="input-group">
                 <label for="deleteMacSelect">Remove Device By MAC Address</label>
                 <div class="delete-owner-flex">
@@ -593,6 +602,9 @@
         const noDueDateCheckbox = document.getElementById('noDueDate');
         const dueDayInput = document.getElementById('dueDay');
         const isInitialPaidCheckbox = document.getElementById('isInitialPaid');
+        
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', renderTable);
 
         // --- Toggle No Due Date UI Behavior ---
         noDueDateCheckbox.addEventListener('change', function() {
@@ -794,6 +806,8 @@
             
             let today = new Date();
             today.setHours(0,0,0,0);
+            
+            const searchTerm = searchInput.value.trim().toLowerCase();
 
             // Calculate Counts based on ALL data
             const categoryCounts = {};
@@ -828,10 +842,15 @@
                 categorySummary.appendChild(badge);
             });
 
-            // Filter data for table rendering
-            const recordsToDisplay = activeCategoryFilter 
-                ? recordsData.filter(r => r.category === activeCategoryFilter)
-                : recordsData;
+            // Filter data for table rendering (Category and Search filters applied)
+            const recordsToDisplay = recordsData.filter(r => {
+                const matchesCategory = activeCategoryFilter ? r.category === activeCategoryFilter : true;
+                const matchesSearch = searchTerm ? (
+                    (r.owner && r.owner.toLowerCase().includes(searchTerm)) ||
+                    (r.mac && r.mac.toLowerCase().includes(searchTerm))
+                ) : true;
+                return matchesCategory && matchesSearch;
+            });
 
             const owners = [...new Set(recordsToDisplay.map(r => r.owner).filter(Boolean))].sort();
 
@@ -864,19 +883,21 @@
                             let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                             if (diffDays < 0) {
-                                badgeClass = 'badge-disconnect';
-                                statusLabel = 'TO BE DISCONNECTED';
+                                badgeClass = 'badge-disconnect'; // Red label background used for overdue
+                                statusLabel = 'OVERDUE';
                                 actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
                             } else if (diffDays === 0) {
-                                badgeClass = 'badge-warning';
+                                badgeClass = 'badge-warning'; // Yellow label background
                                 statusLabel = 'DUE TODAY';
                                 actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
-                            } else if (diffDays === 1) {
-                                badgeClass = 'badge-warning';
-                                statusLabel = 'DUE TOMORROW';
-                                actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
                             } else {
-                                actionHtml = `<span class="text-not-due">NOT DUE YET</span>${deleteBtn}`;
+                                // Status remains PAID unless due date is reached/passed
+                                // ACTION visibility turns on starting 10 days before due date
+                                if (diffDays <= 10) {
+                                    actionHtml = `<button class="btn-mark-paid" onclick="markPaid(${mainIndex})">MARK PAID</button>${deleteBtn}`;
+                                } else {
+                                    actionHtml = `<span class="text-not-due">NOT DUE YET</span>${deleteBtn}`;
+                                }
                             }
                         }
 
