@@ -327,6 +327,13 @@
                         📸 Tap to Upload Image (or Auto-fetched via Lookup)
                     </div>
                     <input type="file" id="new-file" accept="image/*" style="display:none;" onchange="previewImage(event)">
+                    
+                    <!-- Added Image Link Option -->
+                    <div class="input-with-btn" style="margin-top: 10px;">
+                        <input type="text" id="new-image-link" placeholder="Or paste an image URL here...">
+                        <button class="btn btn-info" style="padding:0 15px;" onclick="previewImageLink()">🔗 Load Link</button>
+                    </div>
+
                     <img id="img-preview" src="" alt="Preview">
                 </div>
 
@@ -488,6 +495,41 @@
         function toTitleCase(str) {
             if (!str) return "";
             return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        // --- NEW HELPER FUNCTION TO FORMAT DATES CONSISTENTLY ---
+        function formatExpiryDate(dateStr) {
+            if (!dateStr || dateStr.toLowerCase() === 'no expiry') return 'No Expiry';
+            
+            // Basic regex to check for DD/MM/YYYY or MM/DD/YYYY formats like 08/06/2026 or 8/6/26
+            let parts = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+            let d;
+            
+            if (parts) {
+                let p1 = parseInt(parts[1]);
+                let p2 = parseInt(parts[2]);
+                let p3 = parseInt(parts[3]);
+                if (p3 < 100) p3 += 2000; // fix 2 digit years like '26 to '2026
+                
+                // If first part is > 12, it must be DD/MM/YYYY. Otherwise assume MM/DD/YYYY
+                if (p1 > 12) {
+                    d = new Date(p3, p2 - 1, p1);
+                } else {
+                    d = new Date(p3, p1 - 1, p2);
+                }
+            } else {
+                d = new Date(dateStr); // Rely on JS standard date parsing for "August 6, 2026", "Aug. 06" etc
+            }
+
+            // If it's completely invalid text, just return what they typed
+            if (isNaN(d.getTime())) return dateStr;
+
+            const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+            const month = months[d.getMonth()];
+            const day = String(d.getDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            
+            return `${month} ${day}, ${year}`; // e.g. "Aug. 06, 2026"
         }
 
         function toggleNoExp(mode) {
@@ -800,7 +842,8 @@
             if (!isNoExp) {
                 const dateVal = document.getElementById('new-exp-date').value.trim();
                 if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
-                formattedDate = dateVal; 
+                // CALLING THE NEW FORMAT FUNCTION HERE
+                formattedDate = formatExpiryDate(dateVal); 
             }
 
             if (category === 'add_new_category') {
@@ -984,7 +1027,8 @@
             if (!isNoExp) {
                 const dateVal = document.getElementById('exist-exp-date').value.trim();
                 if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
-                formattedDate = dateVal; 
+                // CALLING THE NEW FORMAT FUNCTION HERE
+                formattedDate = formatExpiryDate(dateVal); 
             }
 
             for (let group of inventoryData) {
@@ -1055,6 +1099,7 @@
             document.getElementById('new-qty').value = '1';
             
             document.getElementById('new-file').value = '';
+            document.getElementById('new-image-link').value = ''; // CLEARS LINK FIELD
             document.getElementById('img-preview').style.display = 'none';
             base64ImageString = "";
 
@@ -1143,6 +1188,23 @@
                 img.src = e.target.result;
             }
             reader.readAsDataURL(file);
+        }
+
+        // --- NEW IMAGE LINK LOADER ---
+        function previewImageLink() {
+            const linkVal = document.getElementById('new-image-link').value.trim();
+            if (!linkVal) {
+                alert("Please enter a valid image URL.");
+                return;
+            }
+            
+            base64ImageString = linkVal;
+            
+            const preview = document.getElementById('img-preview');
+            preview.src = linkVal;
+            preview.style.display = 'block';
+            
+            showToast("Image Link Loaded! 🔗");
         }
 
         function showToast(message) {
