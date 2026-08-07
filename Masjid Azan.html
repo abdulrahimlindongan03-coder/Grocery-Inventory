@@ -6,6 +6,8 @@
     <title>Masjid Prayer Times Management System</title>
     <!-- Import Poppins Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
     <style>
         * {
@@ -17,14 +19,12 @@
         }
 
         body {
-            /* Local Background Image for the Main Dashboard (Desktop) */
             background-color: #0f172a; 
             background-image: url('masjidbg.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
-            
             color: #f8fafc;
             min-height: 100vh;
             padding: 20px;
@@ -39,7 +39,6 @@
             backdrop-filter: blur(8px);
         }
 
-        /* Navigation / Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -49,11 +48,19 @@
             border-radius: 12px;
             border: 1px solid #334155;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         header h1 {
             font-size: 1.5rem;
             color: #38bdf8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -85,7 +92,13 @@
             background: #2563eb;
         }
 
-        /* Views System */
+        .btn-secondary {
+            background: #475569;
+        }
+        .btn-secondary:hover {
+            background: #334155;
+        }
+
         .view {
             display: none;
         }
@@ -93,7 +106,6 @@
             display: block;
         }
 
-        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -111,9 +123,8 @@
             position: relative;
         }
 
-        /* Dark overlay for cards - Opacity reduced for better background visibility */
         .card-content-overlay {
-            background: rgba(30, 41, 59, 0); 
+            background: rgba(30, 41, 59, 0.7); 
             width: 100%;
             height: 100%;
         }
@@ -130,7 +141,7 @@
         .card-header h3 {
             font-size: 1.2rem;
             color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Added for readability */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
         .card-actions {
@@ -151,7 +162,6 @@
             background: rgba(255,255,255,0.4);
         }
 
-        /* Prayer Table inside Card */
         .mini-table {
             width: 100%;
             border-collapse: collapse;
@@ -163,7 +173,7 @@
             border-bottom: 1px solid #334155;
             text-align: left;
             color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Added for readability */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
         .mini-table th {
@@ -177,7 +187,6 @@
             color: #38bdf8;
         }
 
-        /* Form Container */
         .form-container {
             background: #1e293b;
             padding: 30px;
@@ -245,13 +254,6 @@
             margin-top: 30px;
         }
 
-        .btn-secondary {
-            background: #475569;
-        }
-        .btn-secondary:hover {
-            background: #334155;
-        }
-
         .empty-state {
             text-align: center;
             padding: 50px;
@@ -267,56 +269,51 @@
             display: block;
         }
 
-        /* =========================================
-           MOBILE RESPONSIVENESS SECTION 
-           ========================================= */
+        /* Crop Container Styles */
+        .crop-wrapper {
+            display: none;
+            margin-top: 15px;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #38bdf8;
+        }
+
+        .crop-container {
+            max-height: 350px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .crop-preview {
+            max-width: 100%;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             body {
-                /* Change background for mobile devices */
                 background-image: url('masjidbg-mobile.png');
-                background-position: top center; /* Better alignment for portrait */
+                background-position: top center;
                 padding: 10px;
             }
 
             .app-container {
-                /* Darken the container background on mobile so details pop against the mobile bg */
                 background: rgba(15, 23, 42, 0.85); 
                 padding: 15px;
             }
 
             header {
                 flex-direction: column;
-                gap: 15px;
                 text-align: center;
-                padding: 15px;
-            }
-
-            header h1 {
-                font-size: 1.3rem; /* Slightly smaller for mobile */
             }
 
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
 
-            .card-header h3 {
-                font-size: 1.1rem;
-            }
-
-            /* Adjust table for better mobile viewing */
-            .mini-table th, .mini-table td {
-                padding: 8px 5px; /* Tighter padding */
-                font-size: 0.85rem;
-            }
-
-            /* Stack inputs if space is tight */
             .prayer-row-input {
                 grid-template-columns: 1fr;
                 gap: 10px;
-            }
-
-            .form-container {
-                padding: 15px;
             }
         }
     </style>
@@ -324,20 +321,23 @@
 <body>
 
     <div class="app-container">
-        <!-- Dashboard Header -->
+        <!-- Header with Backup/Restore Features -->
         <header>
             <h1>🕌 Masjid Prayer Times Hub</h1>
-            <button class="btn" onclick="openCreateView()">+ Create New Schedule</button>
+            <div class="header-actions">
+                <button class="btn" onclick="openCreateView()">+ Create New Schedule</button>
+                <button class="btn btn-secondary" onclick="exportBackup()">Export Data Backup</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Import Data</button>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importBackup(event)">
+            </div>
         </header>
 
-        <!-- VIEW 1: MAIN DASHBOARD (List of Masjids) -->
+        <!-- VIEW 1: DASHBOARD -->
         <div id="dashboard-view" class="view active">
-            <div id="masjid-grid" class="dashboard-grid">
-                <!-- Dynamically injected masjid cards go here -->
-            </div>
+            <div id="masjid-grid" class="dashboard-grid"></div>
         </div>
 
-        <!-- VIEW 2: CREATE/EDIT SCHEDULE FORM -->
+        <!-- VIEW 2: FORM -->
         <div id="create-view" class="view">
             <div class="form-container">
                 <h2 id="formTitle">Create Masjid Prayer Schedule</h2>
@@ -349,7 +349,6 @@
                         <input type="text" id="masjidName" placeholder="E.G., AL-NOOR ISLAMIC CENTER" required>
                     </div>
 
-                    <!-- Background Image Feature -->
                     <div class="form-group">
                         <label for="bgDevice">Schedule Target Layout</label>
                         <select id="bgDevice" onchange="updateBgReminder()" required>
@@ -360,13 +359,25 @@
                         <small id="bgReminder"></small>
                     </div>
 
+                    <!-- Optional Background Image Upload & Cropper -->
                     <div class="form-group">
                         <label for="bgImage">Background Image (Optional)</label>
-                        <input type="file" id="bgImage" accept="image/*">
+                        <input type="file" id="bgImage" accept="image/*" onchange="handleImageSelection(event)">
                         <input type="hidden" id="existingBgImage" value=""> 
+                        <button type="button" id="removeImgBtn" class="btn btn-danger" style="display:none; margin-top:8px; font-size:0.8rem;" onclick="clearBgImage()">Remove Image</button>
+
+                        <div id="cropWrapper" class="crop-wrapper">
+                            <div class="crop-container">
+                                <img id="cropImage" class="crop-preview" src="">
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button type="button" class="btn btn-edit" onclick="applyCrop()">Apply Crop & Save Image</button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelCrop()">Cancel Crop</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <label style="color: #94a3b8; margin-bottom: 10px; display: block;">Azan & Iqamah Times</label>
+                    <label style="color: #94a3b8; margin-bottom: 10px; display: block;">Azan & Iqamah / Jama'at Times</label>
                     
                     <div id="prayerInputsContainer">
                         <!-- Fajr -->
@@ -433,6 +444,19 @@
                                 <input type="time" name="isha_iqamah" value="21:00" required>
                             </div>
                         </div>
+
+                        <!-- Jum'ah / Jama'at Addition -->
+                        <div class="prayer-row-input">
+                            <span>Jum'ah / Jama'at</span>
+                            <div>
+                                <label style="font-size: 0.75rem; color:#94a3b8">Azan (Khutbah)</label>
+                                <input type="time" name="jumah_azan" value="12:30">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; color:#94a3b8">Jama'at</label>
+                                <input type="time" name="jumah_iqamah" value="13:00">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -444,7 +468,13 @@
         </div>
     </div>
 
+    <!-- Cropper.js Library Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <script>
+        let cropper = null;
+
+        // Initialize localStorage safely
         let masjids = JSON.parse(localStorage.getItem('masjid_schedules')) || [
             {
                 id: 1,
@@ -456,7 +486,8 @@
                     Dhuhr: { azan: "01:15 PM", iqamah: "01:30 PM" },
                     Asr: { azan: "04:45 PM", iqamah: "05:00 PM" },
                     Maghrib: { azan: "07:30 PM", iqamah: "07:35 PM" },
-                    Isha: { azan: "08:50 PM", iqamah: "09:00 PM" }
+                    Isha: { azan: "08:50 PM", iqamah: "09:00 PM" },
+                    "Jum'ah": { azan: "12:30 PM", iqamah: "01:00 PM" }
                 }
             }
         ];
@@ -475,6 +506,7 @@
             document.getElementById('existingBgImage').value = '';
             document.getElementById('formTitle').innerText = 'Create Masjid Prayer Schedule';
             document.getElementById('bgReminder').innerText = '';
+            clearBgImage();
             switchView('create-view');
         }
 
@@ -491,13 +523,53 @@
             }
         }
 
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = (e) => reject(e);
-                reader.readAsDataURL(file);
-            });
+        /* Image Selection & Cropping Handlers */
+        function handleImageSelection(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const cropImg = document.getElementById('cropImage');
+                cropImg.src = event.target.result;
+                document.getElementById('cropWrapper').style.display = 'block';
+
+                if (cropper) cropper.destroy();
+
+                const device = document.getElementById('bgDevice').value;
+                const ratio = device === 'mobile' ? 9 / 16 : (device === 'desktop' ? 16 / 9 : NaN);
+
+                cropper = new Cropper(cropImg, {
+                    aspectRatio: ratio,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyCrop() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas();
+            const croppedBase64 = canvas.toDataURL();
+            document.getElementById('existingBgImage').value = croppedBase64;
+            document.getElementById('removeImgBtn').style.display = 'inline-block';
+            cancelCrop();
+        }
+
+        function cancelCrop() {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            document.getElementById('cropWrapper').style.display = 'none';
+        }
+
+        function clearBgImage() {
+            cancelCrop();
+            document.getElementById('bgImage').value = '';
+            document.getElementById('existingBgImage').value = '';
+            document.getElementById('removeImgBtn').style.display = 'none';
         }
 
         function formatTimeTo12Hour(time24) {
@@ -522,17 +594,10 @@
         async function saveMasjidSchedule(e) {
             e.preventDefault();
 
-            const rawName = document.getElementById('masjidName').value;
-            const name = rawName.toUpperCase();
-            
+            const name = document.getElementById('masjidName').value.toUpperCase();
             const device = document.getElementById('bgDevice').value;
             const editId = document.getElementById('editMasjidId').value;
-            
-            let bgImageData = document.getElementById('existingBgImage').value; 
-            const fileInput = document.getElementById('bgImage');
-            if (fileInput.files && fileInput.files[0]) {
-                bgImageData = await readFileAsDataURL(fileInput.files[0]);
-            }
+            const bgImageData = document.getElementById('existingBgImage').value; 
             
             const scheduleData = {
                 id: editId ? parseInt(editId) : Date.now(),
@@ -559,22 +624,24 @@
                     Isha: { 
                         azan: formatTimeTo12Hour(document.querySelector('[name="isha_azan"]').value), 
                         iqamah: formatTimeTo12Hour(document.querySelector('[name="isha_iqamah"]').value) 
+                    },
+                    "Jum'ah": {
+                        azan: formatTimeTo12Hour(document.querySelector('[name="jumah_azan"]').value),
+                        iqamah: formatTimeTo12Hour(document.querySelector('[name="jumah_iqamah"]').value)
                     }
                 }
             };
 
             if (editId) {
                 const index = masjids.findIndex(m => m.id === parseInt(editId));
-                if (index !== -1) {
-                    masjids[index] = scheduleData;
-                }
+                if (index !== -1) masjids[index] = scheduleData;
             } else {
                 masjids.push(scheduleData);
             }
 
             localStorage.setItem('masjid_schedules', JSON.stringify(masjids));
-
             document.getElementById('scheduleForm').reset();
+            clearBgImage();
             switchView('dashboard-view');
         }
 
@@ -588,6 +655,12 @@
             document.getElementById('bgDevice').value = masjid.device || 'desktop';
             document.getElementById('existingBgImage').value = masjid.bgImage || '';
             
+            if (masjid.bgImage) {
+                document.getElementById('removeImgBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('removeImgBtn').style.display = 'none';
+            }
+
             updateBgReminder();
 
             document.querySelector('[name="fajr_azan"]').value = convert12HourTo24Hour(masjid.prayers.Fajr.azan);
@@ -604,6 +677,11 @@
             
             document.querySelector('[name="isha_azan"]').value = convert12HourTo24Hour(masjid.prayers.Isha.azan);
             document.querySelector('[name="isha_iqamah"]').value = convert12HourTo24Hour(masjid.prayers.Isha.iqamah);
+
+            if (masjid.prayers["Jum'ah"]) {
+                document.querySelector('[name="jumah_azan"]').value = convert12HourTo24Hour(masjid.prayers["Jum'ah"].azan);
+                document.querySelector('[name="jumah_iqamah"]').value = convert12HourTo24Hour(masjid.prayers["Jum'ah"].iqamah);
+            }
 
             switchView('create-view');
         }
@@ -655,8 +733,8 @@
                             <thead>
                                 <tr>
                                     <th>Prayer</th>
-                                    <th>Azan (Bang)</th>
-                                    <th>Iqamah</th>
+                                    <th>Azan</th>
+                                    <th>Jama'at</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -667,6 +745,40 @@
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        /* Export / Import Features for Safe Data Persistence */
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masjids, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "masjid_schedules_backup.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (Array.isArray(importedData)) {
+                        masjids = importedData;
+                        localStorage.setItem('masjid_schedules', JSON.stringify(masjids));
+                        renderDashboard();
+                        alert('Data successfully restored!');
+                    } else {
+                        alert('Invalid backup file format.');
+                    }
+                } catch (err) {
+                    alert('Error reading backup JSON file.');
+                }
+            };
+            reader.readAsText(file);
         }
 
         renderDashboard();
