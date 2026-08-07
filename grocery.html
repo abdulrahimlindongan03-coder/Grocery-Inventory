@@ -142,8 +142,6 @@
             .category-title { font-size: 1.1rem; }
             .card-content { padding: 10px; }
             
-            .card-header-row { flex-direction: column; align-items: flex-start; gap: 4px; }
-            
             .batch-exp { font-size: 0.75rem; }
             .qty-display { font-size: 0.85rem; }
             .btn-qty { width: 24px; height: 24px; font-size: 0.9rem; }
@@ -168,7 +166,7 @@
         .barcode-badge {
             font-size: 0.75rem; background: #e0e7ff; color: var(--primary);
             padding: 2px 6px; border-radius: 6px; font-family: monospace;
-            margin-bottom: 12px; display: inline-block; width: fit-content;
+            display: inline-block; width: fit-content;
         }
 
         .batch-list {
@@ -721,7 +719,7 @@
             
             let totalQty = item.batches.reduce((sum, b) => sum + b.qty, 0);
             let outOfStockBadge = totalQty === 0 
-                ? `<span style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); letter-spacing: 0.5px; vertical-align: middle;">OUT OF STOCK</span>` 
+                ? `<div style="margin-top: 4px;"><span style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); color: white; padding: 3px 8px; border-radius: 8px; font-size: 0.68rem; font-weight: 700; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); letter-spacing: 0.5px; display: inline-block;">OUT OF STOCK</span></div>` 
                 : '';
 
             item.batches.forEach((batch) => {
@@ -751,13 +749,16 @@
                     <div class="card-img-wrapper"><img src="${item.img}" alt="${item.name}" loading="lazy"></div>
                     <div class="card-content">
                         <div class="card-header-row">
-                            <h3 class="card-title">${item.name} ${outOfStockBadge}</h3>
+                            <h3 class="card-title">${item.name}</h3>
                             <div style="display: flex; gap: 4px;">
                                 <button class="btn-delete" style="background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.2);" onclick="openEditModal('${item.id}')" title="Edit Product">✏️</button>
                                 <button class="btn-delete" onclick="deleteProduct('${item.id}')" title="Delete Product">🗑️</button>
                             </div>
                         </div>
-                        ${item.barcode ? `<span class="barcode-badge">🏷️ ${item.barcode}</span>` : ''}
+                        <div style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: flex-start;">
+                            ${item.barcode ? `<span class="barcode-badge">🏷️ ${item.barcode}</span>` : ''}
+                            ${outOfStockBadge}
+                        </div>
                         <div class="batch-list">${batchesHTML}</div>
                     </div>
                 </div>
