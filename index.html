@@ -460,10 +460,7 @@
                 text-align: center;
             }
             
-            /* Make the 3rd button span full width if it's an odd number */
-            .nav-btn:nth-child(3) {
-                grid-column: span 2;
-            }
+            /* The 3rd button span rule was removed since there are now 4 buttons in a clean 2x2 grid */
         }
     </style>
 </head>
@@ -530,6 +527,9 @@
                     </button>
                     <button class="nav-btn" onclick="window.location.href='macaddresses.html'">
                         <span>🛜</span> MAC Addresses
+                    </button>
+                    <button class="nav-btn" onclick="window.location.href='Masjid Azan.html'">
+                        <span>🕌</span> Prayer Time
                     </button>
                 </div>
 
