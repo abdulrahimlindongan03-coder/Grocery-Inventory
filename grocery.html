@@ -324,15 +324,9 @@
                 <div class="form-group">
                     <label>Product Image</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('new-file').click()">
-                        📸 Tap to Upload Image (or Auto-fetched via Lookup)
+                        📸 Tap to Upload, or <b>Paste (Ctrl+V)</b> an Image
                     </div>
                     <input type="file" id="new-file" accept="image/*" style="display:none;" onchange="previewImage(event)">
-                    
-                    <!-- Added Image Link Option -->
-                    <div class="input-with-btn" style="margin-top: 10px;">
-                        <input type="text" id="new-image-link" placeholder="Or paste an image URL here...">
-                        <button class="btn btn-info" style="padding:0 15px;" onclick="previewImageLink()">🔗 Load Link</button>
-                    </div>
 
                     <img id="img-preview" src="" alt="Preview">
                 </div>
@@ -383,7 +377,7 @@
                 <div class="form-group">
                     <label>Product Image</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('edit-file').click()">
-                        📸 Tap to Change Image
+                        📸 Tap to Change, or <b>Paste (Ctrl+V)</b> an Image
                     </div>
                     <input type="file" id="edit-file" accept="image/*" style="display:none;" onchange="previewEditImage(event)">
                     <img id="edit-img-preview" src="" alt="Preview">
@@ -497,11 +491,9 @@
             return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         }
 
-        // --- NEW HELPER FUNCTION TO FORMAT DATES CONSISTENTLY ---
         function formatExpiryDate(dateStr) {
             if (!dateStr || dateStr.toLowerCase() === 'no expiry') return 'No Expiry';
             
-            // Basic regex to check for DD/MM/YYYY or MM/DD/YYYY formats like 08/06/2026 or 8/6/26
             let parts = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
             let d;
             
@@ -509,19 +501,17 @@
                 let p1 = parseInt(parts[1]);
                 let p2 = parseInt(parts[2]);
                 let p3 = parseInt(parts[3]);
-                if (p3 < 100) p3 += 2000; // fix 2 digit years like '26 to '2026
+                if (p3 < 100) p3 += 2000; 
                 
-                // If first part is > 12, it must be DD/MM/YYYY. Otherwise assume MM/DD/YYYY
                 if (p1 > 12) {
                     d = new Date(p3, p2 - 1, p1);
                 } else {
                     d = new Date(p3, p1 - 1, p2);
                 }
             } else {
-                d = new Date(dateStr); // Rely on JS standard date parsing for "August 6, 2026", "Aug. 06" etc
+                d = new Date(dateStr); 
             }
 
-            // If it's completely invalid text, just return what they typed
             if (isNaN(d.getTime())) return dateStr;
 
             const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
@@ -529,7 +519,7 @@
             const day = String(d.getDate()).padStart(2, '0');
             const year = d.getFullYear();
             
-            return `${month} ${day}, ${year}`; // e.g. "Aug. 06, 2026"
+            return `${month} ${day}, ${year}`; 
         }
 
         function toggleNoExp(mode) {
@@ -720,6 +710,12 @@
 
         function renderProductCard(item) {
             let batchesHTML = '';
+            
+            let totalQty = item.batches.reduce((sum, b) => sum + b.qty, 0);
+            let outOfStockBadge = totalQty === 0 
+                ? `<span style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); letter-spacing: 0.5px; vertical-align: middle;">OUT OF STOCK</span>` 
+                : '';
+
             item.batches.forEach((batch) => {
                 const expStatus = getExpiryStatus(batch.exp);
                 let badgeClass = '';
@@ -747,7 +743,7 @@
                     <div class="card-img-wrapper"><img src="${item.img}" alt="${item.name}" loading="lazy"></div>
                     <div class="card-content">
                         <div class="card-header-row">
-                            <h3 class="card-title">${item.name}</h3>
+                            <h3 class="card-title">${item.name} ${outOfStockBadge}</h3>
                             <div style="display: flex; gap: 4px;">
                                 <button class="btn-delete" style="background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.2);" onclick="openEditModal('${item.id}')" title="Edit Product">✏️</button>
                                 <button class="btn-delete" onclick="deleteProduct('${item.id}')" title="Delete Product">🗑️</button>
@@ -842,7 +838,6 @@
             if (!isNoExp) {
                 const dateVal = document.getElementById('new-exp-date').value.trim();
                 if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
-                // CALLING THE NEW FORMAT FUNCTION HERE
                 formattedDate = formatExpiryDate(dateVal); 
             }
 
@@ -1027,7 +1022,6 @@
             if (!isNoExp) {
                 const dateVal = document.getElementById('exist-exp-date').value.trim();
                 if (!dateVal) return alert("Please type an Expiration Date or check 'No Expiration Date'.");
-                // CALLING THE NEW FORMAT FUNCTION HERE
                 formattedDate = formatExpiryDate(dateVal); 
             }
 
@@ -1055,11 +1049,17 @@
                     let batch = item.batches.find(b => b.exp === batchExp);
                     if (batch) {
                         batch.qty += change;
-                        if (batch.qty <= 0) {
-                            if(confirm("Quantity is 0. Delete this expiration batch?")) {
+                        
+                        if (batch.qty === 0) {
+                            // Leave it at 0 to show the Out of Stock label
+                        } else if (batch.qty < 0) {
+                            if (confirm("Delete this expiration batch completely?")) {
                                 item.batches.splice(item.batches.indexOf(batch), 1);
-                            } else { batch.qty = 1; }
+                            } else {
+                                batch.qty = 0; 
+                            }
                         }
+                        
                         autoSaveData(true);
                         return;
                     }
@@ -1099,7 +1099,6 @@
             document.getElementById('new-qty').value = '1';
             
             document.getElementById('new-file').value = '';
-            document.getElementById('new-image-link').value = ''; // CLEARS LINK FIELD
             document.getElementById('img-preview').style.display = 'none';
             base64ImageString = "";
 
@@ -1190,22 +1189,63 @@
             reader.readAsDataURL(file);
         }
 
-        // --- NEW IMAGE LINK LOADER ---
-        function previewImageLink() {
-            const linkVal = document.getElementById('new-image-link').value.trim();
-            if (!linkVal) {
-                alert("Please enter a valid image URL.");
-                return;
+        // --- CLIPBOARD PASTE IMAGE FEATURE ---
+        window.addEventListener('paste', e => {
+            const isAddActive = document.getElementById('productModal').classList.contains('active');
+            const isEditActive = document.getElementById('editProductModal').classList.contains('active');
+            
+            // If no modal is open, ignore paste action
+            if (!isAddActive && !isEditActive) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 400; 
+                            canvas.height = 400;
+                            const ctx = canvas.getContext('2d');
+                            
+                            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                            const x = (canvas.width / 2) - (img.width / 2) * scale;
+                            const y = (canvas.height / 2) - (img.height / 2) * scale;
+                            
+                            ctx.fillStyle = "#f1f2f6";
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                            
+                            const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                            
+                            if (isAddActive) {
+                                base64ImageString = optimizedBase64;
+                                const preview = document.getElementById('img-preview');
+                                preview.src = base64ImageString;
+                                preview.style.display = 'block';
+                            } else if (isEditActive) {
+                                editBase64ImageString = optimizedBase64;
+                                const preview = document.getElementById('edit-img-preview');
+                                preview.src = editBase64ImageString;
+                                preview.style.display = 'block';
+                            }
+                            
+                            showToast("Image Pasted from Clipboard! 📋");
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+                    
+                    e.preventDefault(); 
+                    break;
+                }
             }
-            
-            base64ImageString = linkVal;
-            
-            const preview = document.getElementById('img-preview');
-            preview.src = linkVal;
-            preview.style.display = 'block';
-            
-            showToast("Image Link Loaded! 🔗");
-        }
+        });
 
         function showToast(message) {
             const toast = document.getElementById("toast");
@@ -1231,13 +1271,19 @@
                 receiptHTML += `<div style="margin-top:25px; font-weight:700; border-bottom:2px solid #dfe6e9; font-size:20px; padding-bottom:8px;">${group.category}</div>`;
                 group.items.forEach(item => {
                     let totalQty = item.batches.reduce((sum, batch) => sum + batch.qty, 0);
+                    
+                    let receiptStockLabel = totalQty === 0 
+                        ? `<span style="color:#ff4757; font-weight:800; font-size:14px; margin-left:8px;">[OUT OF STOCK]</span>` 
+                        : '';
+                        
                     let batchStrings = item.batches.map(b => b.exp === 'No Expiry' ? `${b.qty}pcs (No Expiry)` : `${b.qty}pcs (Exp: ${b.exp})`).join('<br>');
                     const crossOriginAttr = item.img.startsWith('data:') ? '' : 'crossorigin="anonymous"';
+                    
                     receiptHTML += `
                         <div style="display:flex; align-items:center; gap:15px; margin-top:12px;">
                             <img src="${item.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #dfe6e9;" ${crossOriginAttr}>
                             <div style="font-size:16px; font-weight:600;">
-                                ${item.name} <span style="font-size:14px; color:#636e72;">(Total: ${totalQty})</span>
+                                ${item.name} <span style="font-size:14px; color:#636e72;">(Total: ${totalQty})</span> ${receiptStockLabel}
                                 <div style="font-size:13px; color:#636e72; font-weight:500;">${batchStrings}</div>
                             </div>
                         </div>`;
